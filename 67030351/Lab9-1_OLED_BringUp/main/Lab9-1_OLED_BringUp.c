@@ -7,6 +7,7 @@
 #include "driver/spi_master.h"
 #include "esp_log.h"
 #include "esp_err.h"
+#include "font5x7.h"
 // 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
 #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
 #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
@@ -119,6 +120,40 @@ void oled_flush(void)
     oled_send_data(s_oled_buffer, sizeof(s_oled_buffer));
 }
 
+// ฟังก์ชันวาดตัวอักษรเดี่ยว 1 ตัวจากตาราง Font Matrix 5x7
+void oled_draw_char(int x, int y, char c, bool color)
+{
+    if (c < 32 || c > 126) c = '?'; // ถ้าอยู่นอกช่วง ASCII ให้แสดงเป็น '?'
+
+    int font_idx = c - 32;
+
+    for (int col = 0; col < 5; col++) {
+        uint8_t line = font5x7[font_idx][col];
+        for (int row = 0; row < 7; row++) {
+            if (line & (1 << row)) {
+                oled_draw_pixel(x + col, y + row, color);
+            } else {
+                oled_draw_pixel(x + col, y + row, !color);
+            }
+        }
+    }
+    // เว้นช่องไฟระหว่างตัวอักษร 1 พิกเซล
+    for (int row = 0; row < 7; row++) {
+        oled_draw_pixel(x + 5, y + row, !color);
+    }
+}
+
+// ฟังก์ชันพิมพ์สตริงข้อความเรียงต่อกัน
+void oled_draw_string(int x, int y, const char *str, bool color)
+{
+    while (*str) {
+        oled_draw_char(x, y, *str, color);
+        x += 6; // ตัวอักษรกว้าง 5 พิกเซล + ช่องไฟ 1 พิกเซล
+        if (x + 6 > 128) break; // ป้องกันข้อความล้นขอบจอขวา
+        str++;
+    }
+}
+
 void app_main(void)
 {
     // 1. เริ่มต้นระบบบัส SPI2 และตั้งค่าพิน DC/RES
@@ -164,5 +199,14 @@ void app_main(void)
     oled_draw_pixel(127, 0, true);   // มุมบนขวา (โซนสีเหลือง)
     oled_draw_pixel(0, 63, true);    // มุมล่างซ้าย (โซนสีฟ้า)
     oled_draw_pixel(127, 63, true);  // มุมล่างขวา (โซนสีฟ้า)
+    oled_flush();
+
+    // --- ต่อท้ายขั้นตอนที่ 5 ใน app_main() ---
+    vTaskDelay(pdMS_TO_TICKS(1500)); // ค้างจุด 4 มุมจอไว้ 1.5 วินาที
+
+    // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
+    oled_clear();
+    oled_draw_string(30, 4, "HELLO WORLD", true);   // โซนสีเหลือง
+    oled_draw_string(24, 32, "ID: 67030351", true);  // โซนสีฟ้า
     oled_flush();
 }
