@@ -61,13 +61,13 @@ Bit 7 (Bottom): ■ ■ ■ ■ ■  <-- เส้นแกนขวางตร
 # รูปภาพการทำแลป
 
 ## สีขาว
-![alt text](image.png)
+![alt text](/Report/img/image.png)
 
 ## จุด 4 มุม
-![alt text](image-1.png)
+![alt text](/Report/img/image-1.png)
 
 ## Hello world + 67030323
-![alt text](image-2.png)
+![alt text](/Report/img/image-2.png)
 
 ---
 

@@ -1,9 +1,18 @@
 # =========================
-# ESP-IDF & CMake / Build
+# ESP-IDF & CMake / Build (Lab 9.1)
 # =========================
 build/
 sdkconfig.old
 managed_components/
+
+# =========================
+# .NET / C# / Kestrel Web Server (Lab 9.2)
+# =========================
+bin/
+obj/
+*.user
+*.userprefs
+appsettings.Development.json
 
 # =========================
 # C/C++ Compiled Objects
@@ -28,13 +37,14 @@ env/
 .env
 
 # =========================
-# IDEs and Editors (VS Code, etc.)
+# IDEs and Editors (VS Code, Visual Studio, etc.)
 # =========================
 .vscode/
 !.vscode/settings.json
 !.vscode/c_cpp_properties.json
 !.vscode/launch.json
 !.vscode/tasks.json
+.vs/
 .idea/
 *.suo
 *.sln
