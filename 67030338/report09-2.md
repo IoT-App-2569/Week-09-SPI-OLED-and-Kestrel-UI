@@ -24,6 +24,7 @@ Server: Kestrel
 
 {"raw":2048,"calibrated":50.0,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-13T..."}
 ```
+<img width="765" height="335" alt="image" src="https://github.com/user-attachments/assets/b4a212c0-dda4-497a-a1ae-9f9d6847cc85" />
 
 ---
 
@@ -39,7 +40,7 @@ curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
 
 **หรือคำสั่งด้วย PowerShell Native (`Invoke-RestMethod`)**
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
+Invoke-RestMethod -Uri http://localhost:5078/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
 ```
 
 **ตัวอย่าง Raw Response ที่ได้รับ**
@@ -50,6 +51,7 @@ Server: Kestrel
 
 {"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
 ```
+<img width="815" height="220" alt="image" src="https://github.com/user-attachments/assets/6746cb1f-05e7-401e-8fa9-47b71acab62a" />
 
 ---
 
@@ -75,6 +77,7 @@ Server: Kestrel
 
 {"status":"success","current":"Hello OLED"}
 ```
+<img width="877" height="207" alt="image" src="https://github.com/user-attachments/assets/d692e722-3bd3-42f3-b838-28d983be0f06" />
 
 ---
 
@@ -95,19 +98,22 @@ Server: Kestrel
 
 1. **ทดสอบป้อนค่าสเกลผิดตรรกะ (Span Point น้อยกว่า Zero Point)**
    ```powershell
-   curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
+   curl.exe -i -X POST http://localhost:5078/api/potentiometer/calibrate `
      -H "Content-Type: application/json" `
      -d '{"rawMin": 4000, "rawMax": 1000, "scaleMin": 0, "scaleMax": 100, "unit": "%"}'
    ```
    * **ผลที่คาดหวัง:** เซิร์ฟเวอร์ต้องตอบกลับด้วย **`400 Bad Request`** พร้อมข้อความเตือน `"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"` โดยที่เซิร์ฟเวอร์ Kestrel **ไม่ล่ม (No Server Crash)**!
+<img width="1211" height="297" alt="image" src="https://github.com/user-attachments/assets/a33cd965-9817-4d50-a2d2-f8ae93783417" />
 
 2. **ทดสอบส่งข้อความว่างเปล่า:**
    ```powershell
-   curl.exe -i -X POST http://localhost:5117/api/oled/message `
+   curl.exe -i -X POST http://localhost:5078/api/oled/message `
      -H "Content-Type: application/json" `
      -d '{"message":""}'
    ```
    * **ผลที่คาดหวัง:** ได้รับ **`400 Bad Request`** แจ้งว่าข้อความต้องไม่ว่างเปล่า
+<img width="792" height="185" alt="image" src="https://github.com/user-attachments/assets/c18c2636-d392-4dad-be73-0e13020d5876" />
+
 
 ---
 
