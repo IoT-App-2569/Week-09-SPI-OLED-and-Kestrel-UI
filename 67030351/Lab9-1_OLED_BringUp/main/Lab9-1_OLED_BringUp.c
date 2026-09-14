@@ -223,7 +223,7 @@ void app_main(void)
     // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
     oled_clear();
     oled_draw_string(30, 4, "Hello World", true);   // โซนสีเหลือง
-    oled_draw_string(24, 32, "ID: 67030311", true);  // โซนสีฟ้า
+    oled_draw_string(24, 32, "ID: 67030351", true);  // โซนสีฟ้า
     oled_flush();
 
     // --- กิจกรรมนิติวิทยาศาสตร์ 1.1 Hex Dump Memory Inspection ---
