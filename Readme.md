@@ -4,22 +4,22 @@
 
 
 
-* **[`/Lab/Lab9-1_OLED_BringUp/`](https://www.google.com/search?q=./Lab/Lab9-1_OLED_BringUp/)**: โฟลเดอร์โปรเจกต์ ESP-IDF (ภาษา C) สำหรับควบคุมการแสดงผลหน้าจอ OLED ผ่านบัส SPI
+* **[`/Lab/Lab9-1_OLED_BringUp/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Lab/ESP32.Kestrel.Webserver)**: โฟลเดอร์โปรเจกต์ ESP-IDF (ภาษา C) สำหรับควบคุมการแสดงผลหน้าจอ OLED ผ่านบัส SPI
 
 
-* **[`/Lab/ESP32.Kestrel.Webserver/`](https://www.google.com/search?q=./Lab/ESP32.Kestrel.Webserver/)**: โฟลเดอร์โปรเจกต์ .NET (ภาษา C#) สำหรับการสร้างเว็บเซิร์ฟเวอร์ด้วย Kestrel Minimal API
+* **[`/Lab/ESP32.Kestrel.Webserver/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Lab/Lab9-1_OLED_BringUp)**: โฟลเดอร์โปรเจกต์ .NET (ภาษา C#) สำหรับการสร้างเว็บเซิร์ฟเวอร์ด้วย Kestrel Minimal API
 
 
-* **[`/Report/`](https://www.google.com/search?q=./Report/)**: โฟลเดอร์จัดเก็บเอกสารรายงานการทดลองและหลักฐานการทำงาน
+* **[`/Report/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Report)**: โฟลเดอร์จัดเก็บเอกสารรายงานการทดลองและหลักฐานการทำงาน
 
 
-* [`Lab1.md`](https://www.google.com/search?q=./Report/Lab1.md): เอกสารอธิบายการทดลองและผลลัพธ์ของการเปิดใช้งาน (Bring-Up) หน้าจอ OLED ผ่าน SPI
+* [`Lab1.md`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/blob/67030323/Report/Lab1.md): เอกสารอธิบายการทดลองและผลลัพธ์ของการเปิดใช้งาน (Bring-Up) หน้าจอ OLED ผ่าน SPI
 
 
-* [`Lab2.md`](https://www.google.com/search?q=./Report/Lab2.md): เอกสารรายงาน, การวิเคราะห์นิติวิทยาศาสตร์เครือข่าย (Forensics) และการทดสอบ Payload สำหรับ Kestrel Web Server
+* [`Lab2.md`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/blob/67030323/Report/Lab2.md): เอกสารรายงาน, การวิเคราะห์นิติวิทยาศาสตร์เครือข่าย (Forensics) และการทดสอบ Payload สำหรับ Kestrel Web Server
 
 
-* [`/img/`](https://www.google.com/search?q=./Report/img/): รูปภาพ Screenshot ของผลลัพธ์จาก Serial Monitor, HTTP Status Codes และการทดสอบผ่าน Terminal
+* [`/img/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Report/img): รูปภาพ Screenshot ของผลลัพธ์จาก Serial Monitor, HTTP Status Codes และการทดสอบผ่าน Terminal
 
 ---
 
