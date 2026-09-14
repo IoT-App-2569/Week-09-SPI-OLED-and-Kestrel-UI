@@ -1,16 +1,68 @@
+# ==========================================
+# C# / .NET Build & Temporary Files
+# ==========================================
+[Bb]in/
+[Oo]bj/
+out/
+publish/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.suo
+*.nupkg
+
+# ==========================================
+# C / C++ / CMake / ESP-IDF Build Artifacts
+# ==========================================
+build/
+build-*/
+managed_components/
+sdkconfig.old
 CMakeLists.txt.user
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
+CMakeFiles/
+CMakeScripts/
+Testing/
 Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-_deps
+_deps/
 CMakeUserPresets.json
+
+# ==========================================
+# IDE & Editor Directories / Settings
+# ==========================================
+.vscode/
+.obsidian/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Operating System Junk
+# ==========================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ==========================================
+# Logs, Backups, Secrets & Temporary Files
+# ==========================================
+*.log
+*.tmp
 *.bkp
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build
-/Example_codes/Lab9-1_OLED_BringUp/build
+*.bak
+.env
+.env.*
+secrets.json
