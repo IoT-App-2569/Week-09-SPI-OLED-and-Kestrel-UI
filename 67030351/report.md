@@ -1,5 +1,28 @@
 # ใบงานการทดลองที่ 9.1 (Lab 9.1)
 > การประกอบสร้างตัวขับจอแสดงผล SSD1306 ทีละชิ้นส่วน (Deconstructed Bring-up) สู่ Hello World และการตรวจสอบความจำภาพเชิงนิติวิทยาศาสตร์ (Framebuffer Forensics)
+
+## 3. บันทึกผลการทดลอง (Experimental Results)
+
+### 3.1 ผลการทดสอบตามลำดับกิจกรรม
+
+1. **กิจกรรมที่ 1.2 (Proof-of-Life Test):** เมื่อส่งชุดคำสั่งเปิด Charge Pump `0x8D, 0x14` และ Display ON `0xAF` พร้อมส่งข้อมูล `0xFF` ทั้งหมด 1,024 ไบต์ หน้าจอสว่างเต็มแผ่นทันที ยืนยันว่าบัส SPI และวงจรทวีแรงดัน 7.5V ทำงานสมบูรณ์
+   ![ผลการทดลองสว่างเต็มแผ่น (Proof-of-Life Test)](Images/Lab9-1-fill.jpg)
+
+2. **กิจกรรมที่ 1.3 (Corner Pixels Test):** หลังล้างหน้าจอและสั่งจุดพิกเซลที่มุม `(0,0)`, `(127,0)`, `(0,63)`, `(127,63)` มีจุดสว่างขึ้น 4 จุดตรงมุมจอพอดี พิสูจน์ความถูกต้องของสูตรคำนวณบิตในแรม
+   ![ผลการทดสอบจุด 4 มุมจอ (Corner Pixels Test)](Images/Lab9-1-corners.jpg)
+
+3. **กิจกรรมที่ 1.4 (Text Display):** เมื่อเรียกฟังก์ชันแสดงผลข้อความ ปรากฏข้อความ `"HELLO WORLD"` และ `"ID: 67030351"` บนหน้าจอ OLED
+   ![ผลการแสดงผลข้อความ Hello World และ ID 67030351](Images/Lab9-1-text.jpg)
+
+### 3.2 ภารกิจสังเกตการณ์เชิงลึก (Forensic Visual Observation Challenge)
+จากการสังเกตความผิดปกติทางกายภาพของแผงจอ OLED อย่างละเอียด พบปรากฏการณ์ดังนี้:
+1. **แถบสีของจอภาพ (Dual-Color Zone):** โครงสร้างโมดูล 0.96" OLED ชนิด 2 สี มีแถบสีเหลือง (16 แถวบน) และแถบสีฟ้า (48 แถวล่าง) แต่บนจอจริงแถบสีเหลืองไปปรากฏอยู่ *ด้านล่าง*
+2. **ทิศทางของตัวอักษร:** ข้อความ `"HELLO WORLD"` แสดงผลกลับหัว 180 องศา (Upside-down Display)
+
+![การสังเกตการณ์การแสดงผลกลับหัว 180 องศา (Upside-down Display)](Images/Lab9-1-upsidedown.jpg)
+
+---
+
 ## 4. ขั้นตอนการตรวจสอบเชิงนิติวิทยาศาสตร์ (Framebuffer Forensics)
 
 ในขั้นตอนนี้ นักศึกษาจะทำหน้าที่เป็น "นักนิติวิทยาศาสตร์คอมพิวเตอร์" เพื่อตรวจสอบความถูกต้องของข้อมูลในแรม (Memory Dump) เทียบกับพิกเซลที่ปรากฏบนจอจริง
@@ -117,3 +140,80 @@ Row 7 (Bit 7):  0 0 0 0 0   (บิต 7 เป็น 0 สำหรับระ
 - **ประโยชน์ในมุมมองวิศวกรรมคอมพิวเตอร์:**
   1. **ลดภาระบัสสื่อสาร (Reduce SPI Bus Overhead):** การเปลี่ยนแปลงทีละพิกเซลไม่ต้องส่งข้อมูลผ่าน SPI ทุกครั้ง ซึ่งช้าและสิ้นเปลืองเวลา CPU
   2. **ป้องกันภาพกระพริบและการฉีกขาดของภาพ (Prevent Screen Flickering & Tearing):** ทำให้โปรแกรมสามารถวาดองค์ประกอบกราฟิกและข้อความให้เสร็จสมบูรณ์ในแรมก่อน จากนั้นค่อยดันข้อมูลขึ้นจอพร้อมกันในจังหวะเดียว (Atomic visual update)
+
+---
+
+# ใบงานการทดลองที่ 9.2 (Lab 9.2)
+> การพัฒนาเอนจินปรับเทียบเซนเซอร์และ API ควบคุมการแสดงผลบน Kestrel Web Server พร้อมการพิสูจน์หลักฐานเครือข่าย (HTTP Payload Forensics)
+
+## 4. ขั้นตอนการตรวจสอบเชิงนิติวิทยาศาสตร์ (HTTP Payload Forensics)
+
+### กิจกรรมนิติวิทยาศาสตร์ 2.1 ทดสอบเรียกใช้งาน API ครบทั้ง 3 รูปแบบ
+
+#### 1. ตรวจสอบ Telemetry ปัจจุบัน (HTTP GET)
+```powershell
+curl.exe -i -X GET http://localhost:5017/api/telemetry
+```
+**Raw Response:**
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Server: Kestrel
+
+{"raw":2048,"calibrated":50.0,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-14T..."}
+```
+
+#### 2. ทำการ Calibrate เซนเซอร์ใหม่ (HTTP POST พร้อม JSON Body)
+```powershell
+curl.exe -i -X POST http://localhost:5017/api/potentiometer/calibrate `
+  -H "Content-Type: application/json" `
+  -d '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
+```
+**Raw Response:**
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Server: Kestrel
+
+{"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
+```
+
+#### 3. ส่งข้อความใหม่ไปแสดงบนหน้าจอ OLED (HTTP POST)
+```powershell
+curl.exe -i -X POST http://localhost:5017/api/oled/message `
+  -H "Content-Type: application/json" `
+  -d '{"message":"Hello OLED"}'
+```
+**Raw Response:**
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Server: Kestrel
+
+{"status":"success","current":"Hello OLED"}
+```
+
+---
+
+## 5. คำถามท้ายการทดลองเพื่อการประเมินผล (Review Questions)
+
+### 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+**ตอบ:**
+- **สถาปัตยกรรม Edge vs Cloud/Core Separation:** ESP32 ควรทำหน้าที่เป็น Edge Device ที่เน้นความเร็วและใช้ทรัพยากรน้อยที่สุด โดยส่งเฉพาะค่าแอนะล็อกดิบ (Raw ADC 0-4095) ซึ่งเป็นข้อมูลสัจพจน์ (Ground Truth Data) ผ่านเครือข่าย
+- **ความยืดหยุ่นในการจัดการ Calibration Model:** การคำนวณสเกล สโลป และสมการปรับเทียบ (Two-Point Linear Calibration) บน Kestrel Server ช่วยให้ผู้ดูแลระบบสามารถปรับเปลี่ยนพารามิเตอร์ Zero/Span Scale หรือเปลี่ยนหน่วยวัดได้จากศูนย์กลางผ่าน REST API โดย**ไม่ต้องแก้ไขหรือแฟลชเฟิร์มแวร์ใหม่ (No Firmware Re-flash)** ลงบนอุปกรณ์ ESP32
+- **ประสิทธิภาพและการใช้พลังงาน:** Kestrel Server ทำงานบนคอมพิวเตอร์ที่มี FPU ประสิทธิภาพสูง การคำนวณคณิตศาสตร์ทศนิยมที่ฝั่งเซิร์ฟเวอร์ช่วยลดภาระ CPU และประหยัดพลังงานบนไมโครคอนโทรลเลอร์ ESP32
+
+---
+
+### 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+**ตอบ:**
+- **ชนิด Exception:** หาก `RawMax == RawMin` ตัวหาร `(RawMax - RawMin)` ในสมการสเกลลาร์จะเป็น `0` ซึ่งหากเป็น Integer จะเกิด `System.DivideByZeroException` แต่หากเป็น `double` จะได้ผลลัพธ์เป็น `Infinity` หรือ `NaN` (Not a Number)
+- **ผลกระทบต่อเซิร์ฟเวอร์:** หากไม่ได้ดักจับด้วย Exception handling หรือ Validation โค้ดจะทำให้ Kestrel ตอบกลับผู้ใช้ด้วยรหัสความผิดพลาด `HTTP 500 Internal Server Error` การเพิ่มเงื่อนไข `if (newSettings.RawMax <= newSettings.RawMin) throw new ArgumentException(...)` เพื่อดักจับและตอบกลับด้วย `HTTP 400 Bad Request` ช่วยป้องกันไม่ให้เซิร์ฟเวอร์ล่ม (No Server Crash)
+
+---
+
+### 3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+**ตอบ:**
+- **Content Negotiation & Model Binding:** ใน Kestrel Minimal API เมื่อ Route กำหนดรับพารามิเตอร์ Request Body เฟรมเวิร์ก .NET จะใช้ JSON Model Binder (`System.Text.Json`) เพื่อแปลง Body เป็น C# Object
+- **บทบาทของ Header:** `Content-Type` เป็นข้อตกลงมาตรฐานของ HTTP/1.1 ที่แจ้งให้ Web Server ทราบชนิดข้อมูลของ Body Payload
+- **สาเหตุ HTTP 415:** หากคำขอไม่ได้ระบุ `Content-Type: application/json` Kestrel จะไม่แน่ใจว่า Body สามารถ Deserialized เป็น JSON ได้อย่างปลอดภัยหรือไม่ เพื่อปฏิบัติตามมาตรฐาน RESTful และป้องกันช่องโหว่ความปลอดภัย Kestrel จึงปฏิเสธคำขอด้วยรหัส `415 Unsupported Media Type` ตั้งแต่ระดับ Middleware Layer
