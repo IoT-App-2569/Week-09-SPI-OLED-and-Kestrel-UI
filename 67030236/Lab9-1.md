@@ -1,4 +1,17 @@
 ### ภาพผลการทดลอง
+แสดงภาพไฟสว่างทั้งหน้าจอ
+
+<img width="633" height="673" alt="image" src="https://github.com/user-attachments/assets/ff853803-b12c-488d-9c74-b22f065b0210" />
+
+แสดงภาพไฟสว่าง 4 มุม
+
+<img width="631" height="667" alt="image" src="https://github.com/user-attachments/assets/ce371d1b-16bf-4b4d-b40b-9b256f0c938e" />
+
+แสดงภาพรหัสและชื่อนักศึกษา
+
+<img width="618" height="687" alt="image" src="https://github.com/user-attachments/assets/42a7f7d4-c486-48c1-9634-32fb92d137ad" />
+
+
 
 
 ### กิจกรรมนิติวิทยาศาสตร์ 1.2 Bit-to-Pixel Forensic Reconstruction
