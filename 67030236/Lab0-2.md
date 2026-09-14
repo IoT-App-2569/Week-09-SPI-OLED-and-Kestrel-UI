@@ -3,6 +3,8 @@
 
 <img width="1296" height="705" alt="image" src="https://github.com/user-attachments/assets/b11bbcbf-3926-4142-8b8d-3a4fb2bb65f9" />
 
+<img width="1297" height="518" alt="image" src="https://github.com/user-attachments/assets/be17b798-a819-4ccb-b5e6-1d6ac9d5a2be" />
+
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
