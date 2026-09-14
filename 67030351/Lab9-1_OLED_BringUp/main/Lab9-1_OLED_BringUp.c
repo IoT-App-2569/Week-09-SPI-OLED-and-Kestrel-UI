@@ -8,6 +8,19 @@
 #include "esp_log.h"
 #include "esp_err.h"
 #include "font5x7.h"
+
+// แมโครสำหรับแปลงไบต์เป็นเลขฐานสอง 8 บิตเพื่อแสดงผลออกทาง Serial Monitor
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (((byte) & 0x80) ? '1' : '0'), \
+  (((byte) & 0x40) ? '1' : '0'), \
+  (((byte) & 0x20) ? '1' : '0'), \
+  (((byte) & 0x10) ? '1' : '0'), \
+  (((byte) & 0x08) ? '1' : '0'), \
+  (((byte) & 0x04) ? '1' : '0'), \
+  (((byte) & 0x02) ? '1' : '0'), \
+  (((byte) & 0x01) ? '1' : '0')
+
 // 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
 #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
 #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
@@ -175,6 +188,9 @@ void app_main(void)
     // step 7 Set Memory Addressing Mode ตั้งค่าเป็น Horizontal Addressing Mode เพื่อให้เขียนข้อมูลต่อเนื่อง
     oled_send_cmd(0x20); // Addressing Mode
     oled_send_cmd(0x00); // Horizontal Mode
+    // step 8 & 9 พลิกหน้าจอให้แถบสีเหลืองอยู่ด้านบน และตัวอักษรไม่กลับหัว
+    oled_send_cmd(0xA1); // Set Segment Re-map (Col 127 -> SEG0 พลิกแนวนอน)
+    oled_send_cmd(0xC8); // Set COM Output Scan Direction (พลิกแนวตั้ง ให้สีเหลืองอยู่บนสุด)
     // step 16 Set Display ON ปล่อยแสงสว่างจากแผง OLED
     oled_send_cmd(0xAF); // Display ON!
     // หมายเหตุ ในตัวอย่างนี้ไม่ได้ตั้งค่าครบทุกเงื่อนไข ให้ไปดูในตารางลำดับคำสั่งมาตรฐานในการเริ่มต้นระบบ (หัวข้อ 9.2.2)
@@ -206,7 +222,21 @@ void app_main(void)
 
     // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
     oled_clear();
-    oled_draw_string(30, 4, "HELLO WORLD", true);   // โซนสีเหลือง
-    oled_draw_string(24, 32, "ID: 67030351", true);  // โซนสีฟ้า
+    oled_draw_string(30, 4, "Hello World", true);   // โซนสีเหลือง
+    oled_draw_string(24, 32, "ID: 67030311", true);  // โซนสีฟ้า
     oled_flush();
+
+    // --- กิจกรรมนิติวิทยาศาสตร์ 1.1 Hex Dump Memory Inspection ---
+    vTaskDelay(pdMS_TO_TICKS(2000)); // ค้างข้อความไว้ 2 วินาที
+
+    // วาด "HELLO WORLD" เริ่มที่พิกัด (0, 0) เพื่อให้ตัว 'H' อยู่ที่ไบต์ 0 ถึง 4 ของ Page 0
+    oled_clear();
+    oled_draw_string(0, 0, "HELLO WORLD", true);
+    oled_flush();
+
+    ESP_LOGI("FORENSIC", "=== DUMPING FRAMEBUFFER PAGE 0 (First 16 Bytes) ===");
+    for (int i = 0; i < 16; i++) {
+        printf("Byte[%2d] (Col %2d): 0x%02X  [Binary: " BYTE_TO_BINARY_PATTERN "]\n", 
+               i, i, s_oled_buffer[i], BYTE_TO_BINARY(s_oled_buffer[i]));
+    }
 }
