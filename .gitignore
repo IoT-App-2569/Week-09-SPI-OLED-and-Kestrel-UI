@@ -1,16 +1,53 @@
+# =========================
+# ESP-IDF & CMake / Build
+# =========================
+build/
+sdkconfig.old
+managed_components/
+
+# =========================
+# C/C++ Compiled Objects
+# =========================
+*.o
+*.obj
+*.elf
+*.bin
+*.map
+*.a
+*.out
+*.hex
+
+# =========================
+# Python & Virtual Environments
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# =========================
+# IDEs and Editors (VS Code, etc.)
+# =========================
+.vscode/
+!.vscode/settings.json
+!.vscode/c_cpp_properties.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+*.suo
+*.sln
 CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
-CMakeUserPresets.json
-*.bkp
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build
-/Example_codes/Lab9-1_OLED_BringUp/build
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
