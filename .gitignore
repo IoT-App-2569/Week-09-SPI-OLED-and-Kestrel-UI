@@ -14,3 +14,7 @@ CMakeUserPresets.json
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build
 /Example_codes/Lab9-1_OLED_BringUp/build
+.DS_Store
+*.DS_Store
+**/bin/
+**/obj/
