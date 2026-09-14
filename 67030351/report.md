@@ -158,39 +158,42 @@ curl.exe -i -X GET http://localhost:5017/api/telemetry
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
+Date: Mon, 14 Sep 2026 14:34:24 GMT
 Server: Kestrel
+Transfer-Encoding: chunked
 
-{"raw":2048,"calibrated":50.0,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-14T..."}
+{"raw":2048,"calibrated":49.9,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-14T14:34:24.8387138Z"}
+```
+
+**ผลลัพธ์จากการเรียกด้วย `Invoke-RestMethod`:**
+```text
+raw        : 2048
+calibrated : 49.9
+unit       : %
+displayMsg : SYSTEM READY
+timestamp  : 2026-09-14T14:34:47.4575788Z
 ```
 
 #### 2. ทำการ Calibrate เซนเซอร์ใหม่ (HTTP POST พร้อม JSON Body)
 ```powershell
-curl.exe -i -X POST http://localhost:5017/api/potentiometer/calibrate `
-  -H "Content-Type: application/json" `
-  -d '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
+Invoke-RestMethod -Uri http://localhost:5017/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
 ```
-**Raw Response:**
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
-
-{"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
+**ผลลัพธ์ที่ได้รับ:**
+```text
+status  settings                                                       
+------  --------                                                       
+success @{rawMin=200; rawMax=3800; scaleMin=0; scaleMax=1000; unit=RPM}
 ```
 
 #### 3. ส่งข้อความใหม่ไปแสดงบนหน้าจอ OLED (HTTP POST)
 ```powershell
-curl.exe -i -X POST http://localhost:5017/api/oled/message `
-  -H "Content-Type: application/json" `
-  -d '{"message":"Hello OLED"}'
+Invoke-RestMethod -Uri http://localhost:5017/api/oled/message -Method Post -ContentType "application/json" -Body '{"message":"Hello OLED"}'
 ```
-**Raw Response:**
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
-
-{"status":"success","current":"Hello OLED"}
+**ผลลัพธ์ที่ได้รับ:**
+```text
+status  current   
+------  -------   
+success Hello OLED
 ```
 
 ---
