@@ -152,7 +152,7 @@ Row 7 (Bit 7):  0 0 0 0 0   (บิต 7 เป็น 0 สำหรับระ
 
 #### 1. ตรวจสอบ Telemetry ปัจจุบัน (HTTP GET)
 ```powershell
-curl.exe -i -X GET http://localhost:5017/api/telemetry
+PS C:\Users\Petch_PC\Desktop\dev\Week-09-SPI-OLED-and-Kestrel-UI> curl.exe -i -X GET http://localhost:5017/api/telemetry
 ```
 **Raw Response:**
 ```http
@@ -166,7 +166,10 @@ Transfer-Encoding: chunked
 ```
 
 **ผลลัพธ์จากการเรียกด้วย `Invoke-RestMethod`:**
-```text
+```powershell
+PS C:\Users\Petch_PC\Desktop\dev\Week-09-SPI-OLED-and-Kestrel-UI> Invoke-RestMethod -Uri http://localhost:5017/api/telemetry -Method Get
+
+
 raw        : 2048
 calibrated : 49.9
 unit       : %
@@ -176,10 +179,8 @@ timestamp  : 2026-09-14T14:34:47.4575788Z
 
 #### 2. ทำการ Calibrate เซนเซอร์ใหม่ (HTTP POST พร้อม JSON Body)
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5017/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
-```
-**ผลลัพธ์ที่ได้รับ:**
-```text
+PS C:\Users\Petch_PC\Desktop\dev\Week-09-SPI-OLED-and-Kestrel-UI> Invoke-RestMethod -Uri http://localhost:5017/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'  
+
 status  settings                                                       
 ------  --------                                                       
 success @{rawMin=200; rawMax=3800; scaleMin=0; scaleMax=1000; unit=RPM}
@@ -187,10 +188,8 @@ success @{rawMin=200; rawMax=3800; scaleMin=0; scaleMax=1000; unit=RPM}
 
 #### 3. ส่งข้อความใหม่ไปแสดงบนหน้าจอ OLED (HTTP POST)
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5017/api/oled/message -Method Post -ContentType "application/json" -Body '{"message":"Hello OLED"}'
-```
-**ผลลัพธ์ที่ได้รับ:**
-```text
+PS C:\Users\Petch_PC\Desktop\dev\Week-09-SPI-OLED-and-Kestrel-UI> Invoke-RestMethod -Uri http://localhost:5017/api/oled/message -Method Post -ContentType "application/json" -Body '{"message":"Hello OLED"}'                                                                  
+
 status  current   
 ------  -------   
 success Hello OLED
