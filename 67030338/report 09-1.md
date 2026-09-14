@@ -61,4 +61,10 @@ Byte[35] (Col 35): 0x00  [Binary: 00000000]
 3. เหตุใดการแก้ไขพิกัด $(x, y)$ บน `s_oled_buffer` จึงไม่ทำให้ภาพบนหน้าจอจริงเปลี่ยนทันที จนกว่าจะมีการเรียกคำสั่ง `oled_flush()`?
 		**ตอบ:** เพราะ `s_oled_buffer` เป็นเพียง **Back Buffer ในหน่วยความจำ RAM ของไมโครคอนโทรลเลอร์ ESP32** ไม่ใช่แรมบนโมดูลจอ OLED การเรียก `oled_draw_pixel()` จึงเป็นเพียงการคำนวณเปลี่ยนค่าบิตใน RAM ของ ESP32 เท่านั้น ข้อมูลยังไม่ได้ถูกยิงออกไปภายนอก ภาพบนจอจะเปลี่ยนก็ต่อเมื่อเรียกคำสั่ง `oled_flush()` ซึ่งทำหน้าที่คัดลอกและยิงส่งข้อมูล 1,024 ไบต์จาก RAM ของ ESP32 ผ่านบัส SPI เข้าไปบันทึกลงใน **Display Data RAM (GDDRAM)** ของชิป SSD1306 หน้าจอจริงจึงจะอัปเดตภาพใหม่
 ---
+<img width="3072" height="4096" alt="IMG_20260914_210551" src="https://github.com/user-attachments/assets/64993c1d-544f-4e07-b8ba-48c2d7d94acb" />
+<img width="3072" height="4096" alt="IMG_20260914_102207" src="https://github.com/user-attachments/assets/da211b36-06f8-4f49-86c2-813a3c22565a" />
+
+<img width="3072" height="4096" alt="IMG_20260914_210641" src="https://github.com/user-attachments/assets/1a33a328-c667-4269-a477-bb003399076f" />
+<img width="3072" height="4096" alt="IMG_20260914_210642" src="https://github.com/user-attachments/assets/f4cd3a0a-22a5-41d6-960b-9a4a4aaea1dd" />
+
 
