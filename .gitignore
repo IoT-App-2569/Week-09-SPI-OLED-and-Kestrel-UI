@@ -14,3 +14,18 @@ CMakeUserPresets.json
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build
 /Example_codes/Lab9-1_OLED_BringUp/build
+
+# ESP-IDF build output
+/Lab9-1_OLED_BringUp/build/
+/Lab9-1_OLED_BringUp/sdkconfig.old
+
+# .NET build output and local run logs
+/ESP32.Kestrel.Webserver/bin/
+/ESP32.Kestrel.Webserver/obj/
+/ESP32.Kestrel.Webserver/build-check*/
+/ESP32.Kestrel.Webserver/kestrel*.log
+
+# IDE-local files
+.vs/
+*.user
+*.suo
