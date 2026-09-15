@@ -276,7 +276,7 @@ void app_main(void)
     /* 6. พิมพ์ข้อความ Hello World และรหัสนักศึกษา */
     oled_clear();
     oled_draw_string(30, 4,  "HELLO WORLD",  true);  /* โซนสีเหลือง */
-    oled_draw_string(24, 32, "ID: 65012345", true);  /* โซนสีฟ้า    */
+    oled_draw_string(24, 32, "ID: 67030120", true);  /* โซนสีฟ้า    */
     oled_flush();
     ESP_LOGI(TAG, "Step 6: text rendered");
 

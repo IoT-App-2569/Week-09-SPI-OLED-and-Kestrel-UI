@@ -8,7 +8,8 @@
 | **โค้ดที่ส่ง** | [`Code/Lab9-2_Kestrel_Webserver/`](../Code/Lab9-2_Kestrel_Webserver/) |
 | **ไฟล์หลัก** | [`Program.cs`](../Code/Lab9-2_Kestrel_Webserver/ESP32.Kestrel.Webserver/Program.cs), [`Services/CalibrationService.cs`](../Code/Lab9-2_Kestrel_Webserver/ESP32.Kestrel.Webserver/Services/CalibrationService.cs) |
 | **เฟรมเวิร์ก** | .NET 10 Minimal API (Kestrel) — พอร์ต `5117` |
-| **สถานะการทดสอบ** | ✅ Build ผ่าน 0 Warning 0 Error / ทดสอบครบ 3 Endpoint + 4 Fault Case |
+| **สถานะการทดสอบ** | ✅ Build ผ่าน 0 Warning 0 Error / ทดสอบครบ 3 Endpoint + 4 Fault Case (รันจริงบนเครื่อง มีภาพหน้าจอยืนยันทุกขั้นตอน) |
+| **หลักฐานภาพ** | [`Image/`](../Image/) — ภาพหน้าจอ Terminal จริงระหว่างทดสอบ 8 ภาพ |
 
 ---
 
@@ -63,22 +64,36 @@ ASP.NET Core แยกแยะเองว่า `CalibrationSettings` ไม�
 
 ### กิจกรรม 2.1 — ทดสอบ API ครบ 3 รูปแบบ (ผลจริงที่รันได้)
 
+#### 0) ตรวจ Root Endpoint ก่อนเริ่มทดสอบ API
+
+เปิดเบราว์เซอร์ไปที่ `http://localhost:5117/` เพื่อยืนยันว่าเซิร์ฟเวอร์รันขึ้นและตอบสนองจริงก่อนยิง API
+
+![Browser Hello World](../Image/02-browser-helloworld.png)
+
+✅ เห็นข้อความ `Hello World!` — ยืนยันว่า Kestrel รับ Request ทาง HTTP ได้ปกติ พร้อมเริ่มทดสอบ Endpoint จริง
+
+---
+
 #### 1) GET /api/telemetry
 
 ```powershell
 curl.exe -i -X GET http://localhost:5117/api/telemetry
 ```
 
-**Raw Response ที่ได้จริง**
+**ภาพหน้าจอ Terminal จริง**
+
+![GET telemetry](../Image/01-get-telemetry.png)
+
+**Raw Response ที่ได้จริง (ถอดจากภาพ)**
 
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
-Date: Tue, 15 Sep 2026 01:50:47 GMT
+Date: Tue, 15 Sep 2026 03:26:41 GMT
 Server: Kestrel
 Transfer-Encoding: chunked
 
-{"raw":2048,"calibrated":49.9,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-15T01:50:47.4958124Z"}
+{"raw":2048,"calibrated":49.9,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-15T03:26:41.350458Z"}
 ```
 
 > **🔍 ข้อสังเกตเชิงนิติวิทยาศาสตร์:** ใบงานยกตัวอย่างว่าจะได้ `calibrated: 50.0` แต่ค่าจริงคือ **49.9**
@@ -101,63 +116,63 @@ Transfer-Encoding: chunked
 #### 2) POST /api/potentiometer/calibrate
 
 ```powershell
-curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
-  -H "Content-Type: application/json" `
-  -d '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
+Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method Post `
+  -ContentType "application/json" `
+  -Body '{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}'
 ```
 
-**Response จริง**
+**ภาพหน้าจอ Terminal จริง**
 
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
+![POST calibrate](../Image/03-post-calibrate.png)
 
-{"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
+**Response จริง (ถอดจากภาพ)**
+
+```
+status  settings
+------  --------
+success @{rawMin=200; rawMax=3800; scaleMin=0; scaleMax=1000; unit=RPM}
 ```
 
-**ตรวจสอบผลข้างเคียง** — เรียก `/api/telemetry` ซ้ำหลัง Calibrate
-
-```json
-{"raw":2048,"calibrated":513.3,"unit":"RPM","displayMsg":"CALIBRATED OK","timestamp":"..."}
-```
-
-✅ ยืนยัน 3 อย่างพร้อมกัน: หน่วยเปลี่ยนเป็น RPM, ค่าคำนวณใหม่ตามสเกล 0–1000 และข้อความ OLED ถูกตั้งเป็น `CALIBRATED OK` อัตโนมัติ
-
-ตรวจสอบเลขคณิต: $\frac{2048-200}{3800-200} \times 1000 = \frac{1848}{3600} \times 1000 = 513.33 \approx 513.3$ ✅
+> **หมายเหตุ:** เลือกใช้ `Invoke-RestMethod` แทน `curl.exe -d` เพราะ PowerShell รับสตริงที่มีเครื่องหมาย `{ }` และ `"` ในตัวแปรได้โดยตรง ไม่ผ่าน argument parser ของโปรแกรมภายนอก (native exe) จึงไม่เสี่ยงเจอปัญหา escape ตัวอักษรแบบที่ `curl.exe` เจอ
 
 ---
 
 #### 3) POST /api/oled/message
 
 ```powershell
-curl.exe -i -X POST http://localhost:5117/api/oled/message `
-  -H "Content-Type: application/json" `
-  -d '{"message":"Hello OLED"}'
+Invoke-RestMethod -Uri http://localhost:5117/api/oled/message -Method Post `
+  -ContentType "application/json" -Body '{"message":"Hello OLED"}'
 ```
 
-**Response จริง**
+**ภาพหน้าจอ Terminal จริง**
 
-```http
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
+![POST oled message](../Image/04-post-oled-message.png)
 
-{"status":"success","current":"Hello OLED"}
+**Response จริง (ถอดจากภาพ)**
+
+```
+status  current
+------  -------
+success Hello OLED
 ```
 
-> **⚠️ บั๊กที่เจอระหว่างทดสอบจริง (บันทึกไว้เป็นบทเรียน)**
-> ครั้งแรกที่ยิงคำสั่งนี้ได้ `400 Bad Request` พร้อม `JsonException: Expected end of string`
-> และ Header แสดง `Content-Length: 17` ทั้งที่ JSON ควรยาว 24 ไบต์
+**ตรวจสอบผลข้างเคียง** — เรียก `/api/telemetry` ซ้ำหลัง Calibrate + ส่งข้อความ
+
+![Telemetry after calibrate](../Image/05-telemetry-after-calibrate-and-fault1-rawmax-lt-rawmin.png)
+
+```json
+{"raw":2048,"calibrated":513.3,"unit":"RPM","displayMsg":"Hello OLED","timestamp":"2026-09-15T03:29:02.1650456Z"}
+```
+
+✅ ยืนยัน 3 อย่างพร้อมกัน: หน่วยเปลี่ยนเป็น RPM, ค่าคำนวณใหม่ตามสเกล 0–1000 และข้อความ OLED ถูกอัปเดตเป็น `Hello OLED` ตามคำสั่งล่าสุด (state ถูกเก็บไว้ใน Singleton `CalibrationService` และ persist ข้าม request จริง)
+
+ตรวจสอบเลขคณิต: $\frac{2048-200}{3800-200} \times 1000 = \frac{1848}{3600} \times 1000 = 513.33 \approx 513.3$ ✅
+
+> **⚠️ บั๊กที่เคยเจอระหว่างพัฒนา (บันทึกไว้เป็นบทเรียน)**
+> ก่อนหน้านี้เคยลองยิงด้วย `curl.exe -d '{"message":"Hello OLED"}'` บน PowerShell แล้วได้ `400 Bad Request` พร้อม `JsonException: Expected end of string` และ Header แสดง `Content-Length: 17` ทั้งที่ JSON ควรยาว 24 ไบต์
 >
-> **สาเหตุ:** PowerShell ตัด argument ที่ **ช่องว่าง** ใน `Hello OLED` ทำให้ `curl.exe` ได้รับ body แค่ `{"message":"Hello` — JSON จึงขาดกลางคัน
-> **ไม่ใช่บั๊กของเซิร์ฟเวอร์** แต่เป็นปัญหาการ escape ของ Shell
->
-> **วิธีแก้ที่ใช้ได้จริง 2 ทาง**
-> 1. ใช้ `Invoke-RestMethod` แทน ซึ่งรับสตริง PowerShell ตรง ๆ ไม่ผ่าน argument parser ของ native exe
-> 2. เก็บ JSON ลงไฟล์แล้วส่งด้วย `curl.exe --data-binary "@body.json"`
->
-> ทั้งสองวิธีให้ `200 OK` และ `{"status":"success","current":"Hello OLED"}` เหมือนกัน
+> **สาเหตุ:** PowerShell ตัด argument ที่ **ช่องว่าง** ใน `Hello OLED` ทำให้ `curl.exe` ได้รับ body แค่ `{"message":"Hello` — JSON จึงขาดกลางคัน **ไม่ใช่บั๊กของเซิร์ฟเวอร์** แต่เป็นปัญหาการ escape ของ Shell
+> **วิธีแก้ที่ใช้จริง:** เปลี่ยนไปใช้ `Invoke-RestMethod` ตามภาพด้านบน ซึ่งได้ `200 OK` ในครั้งแรกที่รันทันที
 
 ---
 
@@ -170,7 +185,56 @@ Server: Kestrel
 | 3 | POST โดยไม่ใส่ `Content-Type` | 415 | `415 Unsupported Media Type` | ✅ PASS |
 | 4 | POST ไปที่ `/api/oled/` (ตกคำว่า message) | 404 | `404 Not Found` | ✅ PASS |
 
-**ข้อพิสูจน์สำคัญที่สุด:** หลังฉีดความผิดพร่องครบทั้ง 4 แบบ **เซิร์ฟเวอร์ Kestrel ยังทำงานต่อได้ปกติ ไม่ล่ม (No Server Crash)** ทดสอบยืนยันด้วยการเรียก `/api/telemetry` ซ้ำหลังจากนั้น ยังได้ `200 OK` ตามเดิม
+#### หลักฐานภาพหน้าจอ Fault Injection ทั้ง 4 กรณี
+
+**Case 1 — `rawMin > rawMax` (ต่อจากภาพที่ 5 ด้านบน)**
+
+```powershell
+curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
+  -H "Content-Type: application/json" -d '{\"rawMin\":4000,\"rawMax\":1000,\"scaleMin\":0,\"scaleMax\":100,\"unit\":\"%\"}'
+```
+
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Server: Kestrel
+
+{"status":"error","message":"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"}
+```
+
+**Case 2 — ข้อความว่างเปล่า**
+
+![Fault: empty message](../Image/06-fault2-empty-message.png)
+
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Server: Kestrel
+
+{"status":"error","message":"ข้อความต้องไม่ว่างเปล่า"}
+```
+
+**Case 3 — ไม่ใส่ `Content-Type`**
+
+![Fault: no Content-Type](../Image/07-fault3-no-content-type.png)
+
+```http
+HTTP/1.1 415 Unsupported Media Type
+Content-Length: 0
+Server: Kestrel
+```
+
+**Case 4 — URL ผิด (`/api/oled/` ตกคำว่า `message`)**
+
+![Fault: bad URL](../Image/08-fault4-bad-url-404.png)
+
+```http
+HTTP/1.1 404 Not Found
+Content-Length: 0
+Server: Kestrel
+```
+
+**ข้อพิสูจน์สำคัญที่สุด:** หลังฉีดความผิดพร่องครบทั้ง 4 แบบ **เซิร์ฟเวอร์ Kestrel ยังทำงานต่อได้ปกติ ไม่ล่ม (No Server Crash)** เห็นได้จากภาพที่ 5 ที่เรียก `/api/telemetry` สำเร็จ (`200 OK`) ต่อเนื่องกับการยิง Fault Case ที่ 1 ในรันเดียวกัน โดยไม่ต้อง restart เซิร์ฟเวอร์
 
 สาเหตุที่ไม่ล่มคือ `ArgumentException` ถูกดักด้วย `try-catch` ในตัว Endpoint แล้วแปลงเป็น HTTP 400 อย่างสุภาพ ไม่ปล่อยให้ exception ทะลุขึ้นไปถึง Middleware Pipeline
 
