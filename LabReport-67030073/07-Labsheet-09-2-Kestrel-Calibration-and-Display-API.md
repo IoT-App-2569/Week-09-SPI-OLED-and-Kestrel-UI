@@ -380,9 +380,30 @@ Server: Kestrel
 ---
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
-1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
-2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
-3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+## 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+
+- **แยกหน้าที่ (Separation of Concerns):** ESP32 ทำหน้าที่แค่อ่านค่าดิบ (raw ADC) และส่งออก ส่วน logic แปลงสเกล/validate อยู่ที่ server ซึ่งดูแลและแก้ไขง่ายกว่า
+- **ปรับคาลิเบรตแบบ real-time:** เปลี่ยนค่า `rawMin/rawMax/scaleMin/scaleMax/unit` ผ่าน endpoint `/api/potentiometer/calibrate` ได้ทันที โดยไม่ต้อง flash เฟิร์มแวร์ ESP32 ใหม่
+- **ทรัพยากรจำกัดบน ESP32:** server มี CPU/RAM มากกว่า คำนวณ floating point และ validate เงื่อนไข (เช่นที่เห็นใน Activity 2.2) ได้แม่นยำและปลอดภัยกว่า
+- **รวมศูนย์การจัดการและตรวจสอบ (forensics):** อย่างที่ทำใน HTTP Payload Forensics (ข้อ 4 ของใบงาน) การดัก error/validate ที่ server ทำให้ตรวจสอบพฤติกรรมผิดปกติ (เช่น Fault Injection) ได้จากจุดเดียว ไม่ต้องรื้อโค้ด embedded
+
+## 2. หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` จะเกิด Exception ชนิดใดในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+
+จากผลทดสอบจริงในกิจกรรม 2.2 ระบบที่ **มี** การ validate จะตอบ `400 Bad Request` พร้อมข้อความ "RawMax ต้องมากกว่า RawMin เสมอ" และเซิร์ฟเวอร์ไม่ crash — คำถามนี้ให้ลองจินตนาการกรณี **ไม่มี** การเช็คนี้อยู่ในโค้ด (`UpdateSettings`) ว่าจะเกิดอะไรขึ้นแทน:
+
+- **ถ้าสูตรคำนวณสเกลหารด้วยจำนวนเต็ม (int)** เช่น `(rawMax - rawMin)` เมื่อ `rawMax == rawMin` ตัวหารเป็น 0 จะเกิด **`System.DivideByZeroException`** ทันที ซึ่งเป็น unhandled exception ทำให้ request ล้มเหลวและ Kestrel ตอบกลับเป็น **`500 Internal Server Error`** แทนที่จะเป็น 400 ตามที่ออกแบบไว้ — คือ server จะ "ล่ม" เฉพาะ request นั้น (thread ตาย) ต่างจากพฤติกรรมที่ถูกต้องซึ่งเห็นในผลทดสอบจริงว่า **"ไม่มี Server Crash"**
+- **ถ้าสูตรหารด้วยทศนิยม (double)** การหารด้วยศูนย์ตามมาตรฐาน IEEE 754 **ไม่ throw exception** แต่ได้ `double.PositiveInfinity`/`NegativeInfinity`/`NaN` แทน ผลคือ server ตอบ **`200 OK` ที่มีข้อมูลเสีย** (`calibrated: Infinity`) กลับไปแบบเงียบๆ ซึ่งอันตรายกว่า เพราะไม่มีสัญญาณเตือนใดๆ ทั้งที่ข้อมูลผิดพลาดสมบูรณ์ — ตรงข้ามกับผลทดสอบจริงที่ควรได้ `400 Bad Request` แจ้งเตือนชัดเจน
+
+**สรุป:** การที่โค้ดจริงมี validation (`if (RawMax <= RawMin) throw new ArgumentException(...)`) ที่ถูก `catch (ArgumentException ex)` ครอบไว้ในโค้ด `Program.cs` คือสิ่งที่ทำให้ระบบตอบ `400 Bad Request` แทนที่จะปล่อยให้เกิด `DivideByZeroException` (crash แบบ 500) หรือค่า `Infinity/NaN` (ข้อมูลเสียแบบเงียบ) ตามที่วิเคราะห์ข้างต้น
+
+## 3. เหตุใด HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+
+ข้อควรสังเกต: การทดสอบส่งข้อความว่างเปล่าในกิจกรรม 2.2 (`{"message":""}` พร้อม header ครบ) ได้ **`400 Bad Request`** ไม่ใช่ `415` — เพราะ body เป็น JSON ที่ถูกต้องตามโครงสร้าง (parse ผ่าน) แต่ค่า *ความหมาย* ผิด (ว่างเปล่า) ต่างจากกรณี `415` ซึ่งเกิด**ก่อน**ที่ server จะ parse เนื้อหาได้ด้วยซ้ำ:
+
+- **Content-Type คือสัญญาบอกรูปแบบข้อมูลใน Body:** เมื่อ client ส่ง body มา server ต้องรู้รูปแบบ (JSON/XML/form ฯลฯ) ก่อนจะแปลงเป็น object ได้ ถ้าไม่ระบุ header นี้ ASP.NET Core ไม่ทราบว่าจะเลือก formatter ตัวไหนมาอ่าน
+- **กลไก Model Binding ของ Minimal API:** เมื่อ endpoint (เช่น `/api/oled/message` ที่รับ `DisplayMessageRequest`) ต้องการ body มา ASP.NET Core จะตรวจ `Content-Type` **ก่อน**เข้าสู่ handler เพื่อเลือก input formatter (เช่น System.Text.Json สำหรับ `application/json`)
+- **ทำไมปฏิเสธแทนที่จะเดา:** หาก header ไม่ตรง/ไม่มี server จะไม่เดาชนิดข้อมูลเอง (เสี่ยง parse ผิดหรือช่องโหว่ความปลอดภัย) จึงปฏิเสธที่ชั้น middleware ก่อน business logic ใดๆ จะทำงาน
+- **415 ต่างจาก 400 อย่างไร (เทียบกับผลทดสอบจริง):** `415` = "ยังไม่รู้ด้วยซ้ำว่าจะอ่านข้อมูลยังไง" (ปัญหาที่ transport/format layer) ส่วน `400` ที่เห็นในกิจกรรม 2.2 (ทั้งกรณี `RawMax<=RawMin` และ `message` ว่างเปล่า) = "อ่านข้อมูลได้ปกติ แต่ค่าที่ส่งมาไม่ผ่านกฎทางธุรกิจ (business validation)" ซึ่งเป็นคนละชั้นกัน
 
 
 
