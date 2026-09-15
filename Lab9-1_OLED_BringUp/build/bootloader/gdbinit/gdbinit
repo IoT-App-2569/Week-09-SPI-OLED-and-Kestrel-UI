@@ -1,0 +1,2 @@
+source /Users/tanwat/ IoT-App-2569/091-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/bootloader/gdbinit/symbols
+source /Users/tanwat/ IoT-App-2569/091-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/bootloader/gdbinit/connect
