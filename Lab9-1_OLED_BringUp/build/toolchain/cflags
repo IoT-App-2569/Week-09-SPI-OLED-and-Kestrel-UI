@@ -1,0 +1,6 @@
+-Wno-frame-address
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
+"-specs=/Users/tanwat/ IoT-App-2569/091-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/specs/picolibc.specs"
