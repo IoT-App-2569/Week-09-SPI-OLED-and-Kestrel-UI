@@ -14,3 +14,15 @@ CMakeUserPresets.json
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build
 /Example_codes/Lab9-1_OLED_BringUp/build
+
+# --- Week 09 submission (branch 67030098-HW) ---
+# ESP-IDF build output
+Code/**/build/
+Code/**/sdkconfig
+Code/**/sdkconfig.old
+Code/**/managed_components/
+Code/**/dependencies.lock
+
+# .NET build output
+Code/**/bin/
+Code/**/obj/
