@@ -1,0 +1,98 @@
+Command: ninja all
+Configuration Report                                                           
++-----------------------------------------------------------------------------+
+|  Parser Version: 1                                                          |
+|  Verbosity: default                                                         |
+|  Defaults policy: sdkconfig                                                 |
+|  Status: Finished with notifications                                        |
+|                                                                             |
+| Miscellaneous                                                               |
+| +-------------------------------------------------------------------------+ |
+| | * BT_NIMBLE_MESH_PROVISIONER (defined at                                | |
+| | C:/esp/v6.0.2/esp-idf/components/bt/host/nimble/Kconfig.in:1421):       | |
+| | 'default 0' is not a valid bool value (only 'y' and 'n' are allowed).   | |
+| | Value is treated as 'n'.                                                | |
+| | * BTDM_CTRL_LEGACY_AUTH_VENDOR_EVT_EFF (defined at                      | |
+| | C:/esp/v6.0.2/esp-idf/components/bt/controller/esp32/Kconfig.in:177):   | |
+| | 'default 0' is not a valid bool value (only 'y' and 'n' are allowed).   | |
+| | Value is treated as 'n'.                                                | |
+| | * FATFS_PRINT_LLI (defined at                                           | |
+| | C:/esp/v6.0.2/esp-idf/components/fatfs/Kconfig:230): 'default 0' is not | |
+| | a valid bool value (only 'y' and 'n' are allowed). Value is treated as  | |
+| | 'n'.                                                                    | |
+| | * FATFS_PRINT_FLOAT (defined at                                         | |
+| | C:/esp/v6.0.2/esp-idf/components/fatfs/Kconfig:235): 'default 0' is not | |
+| | a valid bool value (only 'y' and 'n' are allowed). Value is treated as  | |
+| | 'n'.                                                                    | |
+| +-------------------------------------------------------------------------+ |
++-----------------------------------------------------------------------------+
+CMake Warning in C:/esp/v6.0.2/esp-idf/components/mbedtls/mbedtls/tf-psa-crypto/drivers/everest/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/esp-idf/mbedtls/mbedtls/tf-psa-crypto/drivers/everest/CMakeFiles/everest.dir/./
+
+  has 217 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    library/Hacl_Curve25519_joined.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in C:/esp/v6.0.2/esp-idf/components/mbedtls/mbedtls/tf-psa-crypto/core/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/esp-idf/mbedtls/mbedtls/tf-psa-crypto/core/CMakeFiles/tfpsacrypto.dir/./
+
+  has 210 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    psa_crypto_driver_wrappers_no_static.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in C:/esp/v6.0.2/esp-idf/components/mbedtls/mbedtls/library/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/./
+
+  has 195 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    23c3aaa47cdabb4d829a9ab4c1188944/esp_platform_time.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in C:/esp/v6.0.2/esp-idf/components/bootloader_support/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/esp-idf/bootloader_support/CMakeFiles/__idf_bootloader_support.dir/./
+
+  has 207 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    bootloader_flash/src/bootloader_flash_config_esp32.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+
+CMake Warning in C:/esp/v6.0.2/esp-idf/components/wpa_supplicant/CMakeLists.txt:
+  The object file directory
+
+    C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/./
+
+  has 199 characters.  The maximum full path to an object file is 250
+  characters (see CMAKE_OBJECT_PATH_MAX).  Object file
+
+    esp_supplicant/src/crypto/crypto_mbedtls-bignum.c.obj
+
+  cannot be safely placed under this directory.  The build may not work
+  correctly.
+
+

@@ -379,10 +379,35 @@ Server: Kestrel
 
 ---
 
-## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
+### 5. คำถามท้ายการทดลองเพื่อการประเมินผล
+
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
-2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
-3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+
+มีเหตุผลหลักหลายข้อจากมุมมองสถาปัตยกรรมระบบ IoT:
+
+แยก Concern ระหว่าง Sensing กับ Business Logic — ESP32 ควรทำหน้าที่แค่ "อ่านค่าดิบ (Raw ADC)" และส่งข้อมูลออกไปเท่านั้น ส่วนตรรกะการแปลงสเกล การตรวจสอบขอบเขต และการปรับเทียบ ควรอยู่ในชั้น Application/Server ที่แก้ไขได้ง่ายกว่า
+แก้ไขค่าปรับเทียบได้โดยไม่ต้อง Flash ใหม่ — หากค่า RawMin/RawMax เปลี่ยน (เช่น เปลี่ยนเซนเซอร์ตัวใหม่ที่มีช่วงแรงดันต่างกัน) ฝั่ง Server แค่รับค่าผ่าน POST /api/potentiometer/calibrate แล้วอัปเดต State ในหน่วยความจำได้ทันที ไม่ต้อง idf.py flash บอร์ดใหม่ทุกครั้ง ซึ่งในระบบ IoT ที่ติดตั้งอุปกรณ์กระจายอยู่หลายจุด (Remote Deployment) การ Flash ใหม่ทุกครั้งเป็นไปไม่ได้ในทางปฏิบัติ
+ทรัพยากรของ ESP32 มีจำกัด — MCU มี RAM/CPU จำกัดกว่าเครื่อง Server มาก การคำนวณ Floating-point ที่ซับซ้อน, การตรวจสอบ Exception, หรือการเก็บ Log จำนวนมาก ทำบนฝั่ง Server ได้มีประสิทธิภาพกว่าและไม่แย่ง Resource จาก Real-time Task อื่น ๆ บน MCU (เช่น การควบคุม SPI/OLED)
+รวมศูนย์ (Centralization) เพื่อ Monitoring และ Scale — ถ้ามีเซนเซอร์หลายตัวจากหลายบอร์ด การคำนวณสเกลที่ Server เดียวทำให้ตรวจสอบ Log, เปรียบเทียบข้อมูล, หรือเชื่อมต่อกับ Dashboard/Cloud ได้ง่ายกว่าไปดึง Logic จากแต่ละบอร์ดแยกกัน
+
+2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข RawMax <= RawMin ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+
+หากไม่มีการ throw new ArgumentException(...) ป้องกันไว้ใน UpdateSettings() แล้วมีการเรียก Compute(rawAdc) ด้วยค่า RawMax เท่ากับหรือน้อยกว่า RawMin จะเกิดปัญหาที่บรรทัดคำนวณ:
+
+csharp
+return ((double)(clamped - _settings.RawMin) / (_settings.RawMax - _settings.RawMin)) ...
+ถ้า RawMax == RawMin พอดี ตัวหาร (_settings.RawMax - _settings.RawMin) จะเป็น 0 แต่เนื่องจากตัวแปรเป็นชนิด double (Floating-point) ไม่ใช่ int การหารด้วยศูนย์จะไม่โยน Exception แบบ DivideByZeroException เหมือนการหารเลขจำนวนเต็ม แต่จะได้ผลลัพธ์เป็น double.PositiveInfinity, double.NegativeInfinity, หรือ NaN (Not a Number) ตามเครื่องหมายของตัวตั้งแทน
+ผลลัพธ์ Infinity/NaN นี้จะถูกส่งออกไปใน JSON Response กลายเป็นค่าผิดปกติ เพราะ Infinity/NaN ไม่ใช่ค่า JSON มาตรฐาน System.Text.Json จะ serialize ออกมาเป็น null หรือโยน NotSupportedException ขึ้นระหว่างการ serialize แทน ทำให้ Client ฝั่งที่รับค่าไปแสดงผล (เช่นหน้าเว็บหรือ OLED) เกิดพฤติกรรมผิดปกติ
+ที่ร้ายแรงกว่าคือกรณี RawMax < RawMin (ตามที่ทดสอบในกิจกรรม 2.2) แม้จะไม่ Crash Server ทันที แต่ค่า Calibrated ที่คำนวณได้จะติดลบหรือผิดสเกลไปคนละทิศทาง ทำให้ข้อมูลที่แสดงผลไม่มีความหมายทางฟิสิกส์เลย (Silent Data Corruption) ซึ่งอันตรายกว่าการ Crash เพราะระบบดูเหมือนทำงานปกติแต่ให้ค่าที่ผิด
+นี่คือเหตุผลที่โค้ดตัวอย่างต้อง Validate ที่ต้นทาง (UpdateSettings) ด้วยการโยน ArgumentException แล้ว catch กลับมาเป็น 400 Bad Request เพื่อปฏิเสธค่าที่ผิดตรรกะตั้งแต่ก่อนจะถูกนำไปใช้คำนวณจริง ป้องกันไม่ให้ State ที่เสียหาย (Corrupted State) เข้าไปอยู่ใน _settings ของ Service เลย
+
+3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header Content-Type: application/json จึงถูกปฏิเสธด้วยรหัสสถานะ 415 Unsupported Media Type?
+
+ในสถาปัตยกรรม HTTP นั้น Content-Type Header คือสัญญา (Contract) ที่ฝั่ง Client ใช้บอก Server ว่าข้อมูลใน Body ถูกเข้ารหัสในรูปแบบใด (JSON, form-urlencoded, XML, multipart ฯลฯ) เพราะ Body ของ HTTP เป็นเพียง สตรีมไบต์ดิบ (Raw Byte Stream) ที่ไม่มีข้อมูลบอกรูปแบบตัวเองอยู่ในตัว
+
+เมื่อ ASP.NET Core Minimal API เห็น Route ที่รับ Parameter เป็น Complex Object เช่น DisplayMessageRequest req หรือ CalibrationSettings newSettings เฟรมเวิร์กจะต้องรู้ว่าต้องใช้ Model Binder ตัวไหนมาแปลง (Deserialize) Byte Stream นั้นกลับเป็น Object ของ C# — โดยปกติจะพยายามใช้ JSON Input Formatter เป็นค่าเริ่มต้น แต่กระบวนการนี้ทำงานได้ก็ต่อเมื่อ Header ประกาศชัดเจนว่า Content-Type: application/json
+
+หากไม่มี Header นี้ (หรือใส่ Content-Type อื่นที่ Formatter ไม่รู้จัก) Kestrel/ASP.NET Core จะไม่พยายามเดาหรือแปลง Body เอง เพราะเป็นความเสี่ยงด้านความปลอดภัยและความถูกต้อง (การเดาผิดอาจตีความข้อมูลผิดรูปแบบ) จึงปฏิเสธคำขอทันทีด้วย 415 Unsupported Media Type ซึ่งเป็นรหัสสถานะที่กำหนดไว้ใน HTTP Specification (RFC 9110) โดยเฉพาะเพื่อสื่อว่า "เซิร์ฟเวอร์เข้าใจคำขอ แต่ปฏิเสธเพราะรูปแบบของ Payload (Media Type) ที่ส่งมาไม่ตรงกับที่ Endpoint นี้รองรับ" — ต่างจาก 400 Bad Request ที่หมายถึงตัวข้อมูลผิดรูปแบบ/ผิดไวยากรณ์ แต่ 415 หมายถึงยังไม่ทันได้อ่านข้อมูลเลยด้วยซ้ำ เพราะไม่รู้จะอ่านอย่างไร
 
 
 
