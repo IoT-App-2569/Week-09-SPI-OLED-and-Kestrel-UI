@@ -88,6 +88,8 @@ ADC:885,3339
 
    **📷 แนบรูปถ่ายหน้าจอ OLED ขณะอยู่ใน Edge Mode**
 
+<img width="617" height="556" alt="S__72851590" src="https://github.com/user-attachments/assets/de7599c7-45d2-4f7e-8f61-1923c53195f3" />
+
 ---
 
 ## ผลการทดลอง Checkpoint 3.2 — Transition to Cloud Computing Mode
@@ -121,6 +123,7 @@ info: Microsoft.Hosting.Lifetime[0]
 
    **📷 แนบรูปถ่ายหน้าจอ OLED ขณะอยู่ใน Cloud Mode**
 
+<img width="826" height="663" alt="S__72851591" src="https://github.com/user-attachments/assets/7cf75478-b795-4c9d-b6a9-3d1e1abea775" />
 
 3. **ทดสอบปิด Kestrel (`Ctrl+C`) แล้วเปิดใหม่**
 
@@ -139,6 +142,20 @@ info: Microsoft.Hosting.Lifetime[0]
    - ข้อความที่ทดสอบส่ง `Tanabordi`
 
    **📷 แนบรูป Screenshot ของ Web Dashboard**
+
+**ผลการทดลอง : หมุน Potentiometer 0%**
+
+<img width="703" height="506" alt="S__72851597" src="https://github.com/user-attachments/assets/c6756d4e-c34a-4fc7-a86e-914a9ad983d2" />
+
+<img width="765" height="552" alt="S__72851596" src="https://github.com/user-attachments/assets/9a6c9650-65dd-4999-9494-40d4b9ace030" />
+
+---
+
+**ผลการทดลอง : หมุน Potentiometer 100%**
+
+<img width="685" height="527" alt="S__72851598" src="https://github.com/user-attachments/assets/b198b099-25f1-44db-ba81-4f0bd75bce7f" />
+
+<img width="772" height="577" alt="S__72851595" src="https://github.com/user-attachments/assets/8797f04e-eb82-4011-b981-179b5ecb549a" />
 
 ---
 
