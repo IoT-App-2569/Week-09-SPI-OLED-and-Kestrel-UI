@@ -210,7 +210,7 @@ void app_main(void)
 
 ---
 #แถบสีเหลืองด้านบน + สีฟ้า
-<img width="1000" height="1500" alt="IMG_1662" src="https://github.com/user-attachments/assets/2f5da9cc-086d-4329-9b16-fa3c1476e191" />
+<img width="1200" height="600 alt="IMG_1662" src="https://github.com/user-attachments/assets/2f5da9cc-086d-4329-9b16-fa3c1476e191" />
 ---
 
 ---
@@ -405,6 +405,9 @@ void app_main(void)
 ```
 #จุดสว่างพิกเซลเดี่ยว 4 จุดตรงมุมทั้งสี่
 <img width="1206" height="676" alt="image" src="https://github.com/user-attachments/assets/f6261a79-d065-4667-9892-294db9e2b74d" />
+
+#ภาพถ่ายจอ OLED แสดงข้อความ HELLO WORLD (โซนสีเหลือง) และ ID: 67030311 (รหัสนักศึกษา โซนสีฟ้า)
+<img width="1206" height="676" alt="IMG_1894" src="https://github.com/user-attachments/assets/52f7933f-68f3-4c2f-be41-432d48ea111c" />
 
 
 > [!IMPORTANT]
