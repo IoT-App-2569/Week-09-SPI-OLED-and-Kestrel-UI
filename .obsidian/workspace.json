@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification"
+              "title": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API"
             }
           }
         ]
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -190,20 +190,19 @@
   },
   "active": "68d49782928f10a2",
   "lastOpenFiles": [
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.pdb",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/obj/Debug/net10.0/ref/ESP32.Kestrel.Webserver.dll",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.dll",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.runtimeconfig.json",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/obj/Debug/net10.0/ESP32.Kestrel.Webserver.genruntimeconfig.cache",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.deps.json",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.exe",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.staticwebassets.runtime.json",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/ESP32.Kestrel.Webserver.staticwebassets.endpoints.json",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/appsettings.Development.json",
-    "Lab9_Codes/ESP32.Kestrel.Webserver/bin/Debug/net10.0/appsettings.json",
+    "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/log/idf_py_stdout_output_31232",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/log/idf_py_stderr_output_31232",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/bootloader/CMakeFiles/CMakeScratch",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/spiffs/libspiffs.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/rt/librt.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/perfmon/libperfmon.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/nvs_sec_provider/libnvs_sec_provider.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/mqtt/libmqtt.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/json/libjson.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/fatfs/libfatfs.a",
     "03-Graphics-Rendering-Engine-and-Font-Bitmaps.md",
     "04-Closed-Loop-IoT-Pipeline-and-Calibration.md",
-    "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
     "06-Labsheet-09-1-SPI-OLED-Deconstructed-Bringup.md",
     "Images/OLED_Display_Zone.svg",
     "Images/Closed-Loop System Flow.svg",
