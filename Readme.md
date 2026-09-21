@@ -1,5 +1,6 @@
 # Week 09: SPI OLED Display Architecture, 1KB Framebuffer & Edge Kestrel UI
 
+
 ## 1. บทนำ (Introduction)
 ในสัปดาห์ที่ 9 นี้ เราจะขยายขีดความสามารถของระบบ IoT จากสัปดาห์ที่ 8 ซึ่งเราสามารถรับสัญญาณอินพุตจากตัวต้านทานปรับค่าได้ (Potentiometer) ส่งผ่านพอร์ตสื่อสารอนุกรมเข้าสู่ **Kestrel Web Server (.NET 8 Minimal API)** ได้แล้ว 
 

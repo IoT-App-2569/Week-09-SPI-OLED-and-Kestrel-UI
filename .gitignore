@@ -1,20 +1,47 @@
+# ==========================================
+# CMake, Make, and CTest Build Artifacts
+# ==========================================
 CMakeLists.txt.user
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
+CMakeFiles/
+CMakeScripts/
+Testing/
 Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-_deps
+_deps/
 CMakeUserPresets.json
+
+# ==========================================
+# ESP32 / C / C++ Build Directories
+# ==========================================
+# ละเว้นโฟลเดอร์ build เฉพาะเจาะจงตามที่คุณระบุ
+/Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6/
+/Example_codes/Lab9-1-SPI-OLED-Bringup/build/
+/Example_codes/Lab9-1_OLED_BringUp/build/
+/Example_codes/Lab9-SPI-OLED-MultiZone/build/
+/Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/
+
+# (ทางเลือก) หากต้องการให้ครอบคลุมโฟลเดอร์ build ทุกที่ในโปรเจกต์โดยอัตโนมัติ
+# เอาเครื่องหมาย # ด้านหน้าออกได้เลย
+# **/build/
+# **/build-*/
+
+# ==========================================
+# .NET / Kestrel Webserver Artifacts
+# ==========================================
+/Lab9_Codes/ESP32.Kestrel.Webserver/bin/
+/Lab9_Codes/ESP32.Kestrel.Webserver/obj/
+
+# (ทางเลือก) ครอบคลุม bin และ obj ของ C#/.NET ทุกที่
+# **/bin/
+# **/obj/
+
+# ==========================================
+# Backup and Temporary Files
+# ==========================================
 *.bkp
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
-/Example_codes/Lab9-1-SPI-OLED-Bringup/build
-/Example_codes/Lab9-1_OLED_BringUp/build
-/Example_codes/Lab9-SPI-OLED-MultiZone/build
-/Lab9_Codes/ESP32.Kestrel.Webserver/bin
-/Lab9_Codes/ESP32.Kestrel.Webserver/obj
-/Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build
+
+.vscode

@@ -1,0 +1,233 @@
+Command: C:\Users\Rusneeda\.espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:\Users\Rusneeda\esp\v5.5.1\esp-idf\tools/idf_monitor.py -p COM3 -b 115200 --toolchain-prefix xtensa-esp32-elf- --target esp32 --revision 0 D:\1-2569\IOT\Week-09-SPI-OLED-and-Kestrel-UI\week09-Lab\Lab9-3-ESP32-ClosedLoop\build\Lab9-3-ESP32-ClosedLoop.elf D:\1-2569\IOT\Week-09-SPI-OLED-and-Kestrel-UI\week09-Lab\Lab9-3-ESP32-ClosedLoop\build\bootloader\bootloader.elf --force-color -m 'C:\Users\Rusneeda\.espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe' 'C:\Users\Rusneeda\esp\v5.5.1\esp-idf\tools\idf.py' '-p' 'COM3'
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:6380
+ho 0 tail 12 room 4
+load:0x40078000,len:15916
+load:0x40080400,len:3860
+entry 0x40080638
+[0;32mI (29) boot: ESP-IDF v5.5.1 2nd stage bootloader[0m
+[0;32mI (29) boot: compile time Sep 21 2026 10:03:34[0m
+[0;32mI (29) boot: Multicore bootloader[0m
+[0;32mI (31) boot: chip revision: v3.1[0m
+[0;32mI (33) boot.esp32: SPI Speed      : 40MHz[0m
+[0;32mI (37) boot.esp32: SPI Mode       : DIO[0m
+[0;32mI (41) boot.esp32: SPI Flash Size : 2MB[0m
+[0;32mI (44) boot: Enabling RNG early entropy source...[0m
+[0;32mI (49) boot: Partition Table:[0m
+[0;32mI (51) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (64) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (71) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (77) boot: End of partition table[0m
+[0;32mI (81) esp_image: segment 0: paddr=00010020 vaddr=3f400020 size=0d2f4h ( 54004) map[0m
+[0;32mI (106) esp_image: segment 1: paddr=0001d31c vaddr=3ffb0000 size=0256ch (  9580) load[0m
+[0;32mI (110) esp_image: segment 2: paddr=0001f890 vaddr=40080000 size=00788h (  1928) load[0m
+[0;32mI (111) esp_image: segment 3: paddr=00020020 vaddr=400d0020 size=226b8h (140984) map[0m
+[0;32mI (166) esp_image: segment 4: paddr=000426e0 vaddr=40080788 size=0f7b0h ( 63408) load[0m
+[0;32mI (191) esp_image: segment 5: paddr=00051e98 vaddr=50000000 size=00020h (    32) load[0m
+[0;32mI (199) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (199) boot: Disabling RNG early entropy source...[0m
+[0;32mI (211) cpu_start: Multicore app[0m
+[0;32mI (220) cpu_start: Pro cpu start user code[0m
+[0;32mI (220) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (220) app_init: Application information:[0m
+[0;32mI (220) app_init: Project name:     Lab9-3-ESP32-ClosedLoop[0m
+[0;32mI (225) app_init: App version:      5bd781b-dirty[0m
+[0;32mI (230) app_init: Compile time:     Sep 21 2026 10:01:36[0m
+[0;32mI (235) app_init: ELF file SHA256:  6032eb450...[0m
+[0;32mI (239) app_init: ESP-IDF:          v5.5.1[0m
+[0;32mI (243) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (247) efuse_init: Max chip rev:     v3.99 [0m
+[0;32mI (251) efuse_init: Chip rev:         v3.1[0m
+[0;32mI (255) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (261) heap_init: At 3FFAE6E0 len 00001920 (6 KiB): DRAM[0m
+[0;32mI (266) heap_init: At 3FFB3290 len 0002CD70 (179 KiB): DRAM[0m
+[0;32mI (271) heap_init: At 3FFE0440 len 00003AE0 (14 KiB): D/IRAM[0m
+[0;32mI (277) heap_init: At 3FFE4350 len 0001BCB0 (111 KiB): D/IRAM[0m
+[0;32mI (282) heap_init: At 4008FF38 len 000100C8 (64 KiB): IRAM[0m
+[0;32mI (289) spi_flash: detected chip: generic[0m
+[0;32mI (291) spi_flash: flash io: dio[0m
+[0;33mW (294) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (307) main_task: Started on CPU0[0m
+[0;32mI (317) main_task: Calling app_main()[0m
+[0;32mI (337) CLOSED_LOOP: Hardware initialized successfully.[0m
+ADC:1936,51
+ADC:1936,99
+ADC:1936,149
+ADC:1936,199
+ADC:1937,249
+ADC:1936,299
+ADC:1936,349
+ADC:1936,399
+ADC:1936,449
+ADC:1936,499
+ADC:1936,549
+ADC:1936,599
+ADC:1937,649
+ADC:1936,699
+ADC:1936,749
+ADC:1936,799
+ADC:1936,849
+ADC:1937,899
+ADC:1936,949
+ADC:1937,999
+ADC:1936,1049
+ADC:1936,1099
+ADC:1936,1149
+ADC:1936,1199
+ADC:1936,1249
+ADC:1937,1299
+ADC:1936,1349
+ADC:1936,1399
+ADC:1936,1449
+ADC:1937,1499
+ADC:1936,1549
+ADC:1936,1599
+ADC:1936,1649
+ADC:1936,1699
+ADC:1936,1749
+ADC:1936,1799
+ADC:1936,1849
+ADC:1936,1899
+ADC:1936,1949
+ADC:1938,1999
+ADC:1936,2049
+ADC:1937,2099
+ADC:1937,2149
+ADC:1936,2199
+ADC:1936,2249
+ADC:1936,2299
+ADC:1936,2349
+ADC:1936,2399
+ADC:1937,2449
+ADC:1937,2499
+ADC:1937,2549
+ADC:1936,2599
+ADC:1936,2649
+ADC:1936,2699
+ADC:1936,2749
+ADC:1936,2799
+ADC:1936,2849
+ADC:1936,2899
+ADC:1936,2949
+ADC:1936,2999
+ADC:1936,3049
+ADC:1936,3099
+ADC:1936,3149
+ADC:1936,3199
+ADC:1936,3249
+ADC:1937,3299
+ADC:1936,3349
+ADC:1937,3399
+ADC:1937,3449
+ADC:1936,3499
+ADC:1938,3549
+ADC:1936,3599
+ADC:1936,3649
+ADC:1936,3699
+ADC:1937,3749
+ADC:1938,3799
+ADC:1936,3849
+ADC:1936,3899
+ADC:1936,3949
+ADC:1936,3999
+ADC:1938,4049
+ADC:1936,4099
+ADC:1936,4149
+ADC:1936,4199
+ADC:1936,4249
+ADC:1936,4299
+ADC:1936,4349
+ADC:1936,4399
+ADC:1936,4449
+ADC:1936,4499
+ADC:1937,4549
+ADC:1936,4599
+ADC:1936,4649
+ADC:1937,4699
+ADC:1937,4749
+ADC:1936,4799
+ADC:1936,4849
+ADC:1937,4899
+ADC:1936,4949
+ADC:1938,4999
+ADC:1936,5049
+ADC:1937,5099
+ADC:1936,5149
+ADC:1936,5199
+ADC:1937,5249
+ADC:1936,5299
+ADC:1936,5349
+ADC:1936,5399
+ADC:1936,5449
+ADC:1939,5499
+ADC:1936,5549
+ADC:1936,5599
+ADC:1936,5649
+ADC:1936,5699
+ADC:1937,5749
+ADC:1936,5799
+ADC:1936,5849
+ADC:1936,5899
+ADC:1936,5949
+ADC:1936,5999
+ADC:1936,6049
+ADC:1937,6099
+ADC:1936,6149
+ADC:1936,6199
+ADC:1936,6249
+ADC:1936,6299
+ADC:1936,6349
+ADC:1937,6399
+ADC:1936,6449
+ADC:1938,6499
+ADC:1936,6549
+ADC:1937,6599
+ADC:1936,6649
+ADC:1935,6699
+ADC:1936,6749
+ADC:1937,6799
+ADC:1936,6849
+ADC:1936,6899
+ADC:1937,6949
+ADC:1936,6999
+ADC:1936,7049
+ADC:1937,7099
+ADC:1936,7149
+ADC:1936,7199
+ADC:1936,7249
+ADC:1937,7299
+ADC:1936,7349
+ADC:1936,7399
+ADC:1936,7449
+ADC:1936,7499
+ADC:1936,7549
+ADC:1936,7599
+ADC:1936,7649
+ADC:1936,7699
+ADC:1941,7749
+ADC:1936,7799
+ADC:1936,7849
+ADC:1937,7899
+ADC:1936,7949
+ADC:1936,7999
+ADC:1936,8049
+ADC:1936,8099
+ADC:1936,8149
+ADC:1936,8199
+ADC:1936,8249
+ADC:1936,8299
+ADC:1936,8349
+ADC:1936,8399
+ADC:1936,8449
+ADC:1936,8499
+ADC:1936,8549
+ADC:1937,8599
+ADC:1936,8649
+ADC:1936,8699
+ADC:1936,8749

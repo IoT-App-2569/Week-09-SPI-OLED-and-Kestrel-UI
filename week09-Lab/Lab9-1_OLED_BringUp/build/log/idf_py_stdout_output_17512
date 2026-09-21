@@ -1,0 +1,278 @@
+Command: ninja all
+[1/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/Lab9-1_OLED_BringUp.c.obj
+FAILED: esp-idf/main/CMakeFiles/__idf_main.dir/Lab9-1_OLED_BringUp.c.obj 
+ccache C:\Users\Rusneeda\.espressif\tools\xtensa-esp-elf\esp-14.2.0_20241119\xtensa-esp-elf\bin\xtensa-esp32-elf-gcc.exe -DESP_PLATFORM -DIDF_VER=\"v5.5.1\" -DMBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -DSOC_XTAL_FREQ_MHZ=CONFIG_XTAL_FREQ -DUNITY_INCLUDE_CONFIG_H -D_GLIBCXX_HAVE_POSIX_SEMAPHORE -D_GLIBCXX_USE_POSIX_SEMAPHORE -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS -ID:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/build/config -ID:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/newlib/platform_include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/config/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/config/include/freertos -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/config/xtensa/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/FreeRTOS-Kernel/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/FreeRTOS-Kernel/portable/xtensa/include/freertos -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/freertos/esp_additions/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/include/soc -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/include/soc/esp32 -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/dma/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/ldo/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/debug_probe/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/mspi_timing_tuning/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/mspi_timing_tuning/tuning_scheme_impl/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/power_supply/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/port/esp32/. -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hw_support/port/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/heap/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/heap/tlsf -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/log/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/soc/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/soc/esp32 -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/soc/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/soc/esp32/register -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/hal/platform_port/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/hal/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/hal/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_rom/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_rom/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_rom/esp32/include/esp32 -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_rom/esp32 -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_common/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_system/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_system/port/soc -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_system/port/include/private -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/xtensa/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/xtensa/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/xtensa/deprecated_include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/include/apps -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/include/apps/sntp -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/lwip/src/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/port/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/port/freertos/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/port/esp32xx/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/port/esp32xx/include/arch -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/lwip/port/esp32xx/include/sys -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_gpio/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_pm/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/port/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/mbedtls/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/mbedtls/library -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/esp_crt_bundle/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/mbedtls/3rdparty/everest/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/mbedtls/3rdparty/p256-m -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mbedtls/mbedtls/3rdparty/p256-m/p256-m -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_app_format/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_bootloader_format/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/app_update/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/bootloader_support/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/bootloader_support/bootloader_flash/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_partition/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/efuse/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/efuse/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_mm/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/spi_flash/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_security/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/pthread/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_timer/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_gptimer/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_ringbuf/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_uart/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/vfs/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/app_trace/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_event/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/nvs_flash/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_phy/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_phy/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_usb_serial_jtag/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_vfs_console/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_netif/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/wpa_supplicant/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/wpa_supplicant/port/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/wpa_supplicant/esp_supplicant/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_coex/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_wifi/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_wifi/include/local -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_wifi/wifi_apps/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_wifi/wifi_apps/nan_app/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_spi/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_gdbstub/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/unity/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/unity/unity/src -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/cmock/CMock/src -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/console -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_pcnt/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_mcpwm/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_ana_cmpr/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_i2s/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/sdmmc/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_sdmmc/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_sdspi/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_sdio/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_dac/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_bitscrambler/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_rmt/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_tsens/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_sdm/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_i2c/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_ledc/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_parlio/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_twai/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/driver/deprecated -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/driver/i2c/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/driver/touch_sensor/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/driver/twai/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/driver/touch_sensor/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/http_parser -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp-tls -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp-tls/esp-tls-crypto -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_adc/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_adc/interface -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_adc/esp32/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_adc/deprecated/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_isp/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_cam/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_cam/interface -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_psram/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_jpeg/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_ppa/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_touch_sens/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_driver_touch_sens/hw_ver1/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_eth/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_hid/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/tcp_transport/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_http_client/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_http_server/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_https_ota/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_https_server/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_lcd/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_lcd/interface -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protobuf-c/protobuf-c -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protocomm/include/common -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protocomm/include/security -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protocomm/include/transports -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protocomm/include/crypto/srp6a -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/protocomm/proto-c -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/esp_local_ctrl/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/espcoredump/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/espcoredump/include/port/xtensa -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/wear_levelling/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/fatfs/diskio -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/fatfs/src -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/fatfs/vfs -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/idf_test/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/idf_test/include/esp32 -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/ieee802154/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/json/cJSON -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/mqtt/esp-mqtt/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/nvs_sec_provider/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/perfmon/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/rt/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/spiffs/include -IC:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/wifi_provisioning/include -mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-memset -fno-builtin-bzero -fno-builtin-stpcpy -fno-builtin-strncpy -fdiagnostics-color=always -ffunction-sections -fdata-sections -Wall -Werror=all -Wno-error=unused-function -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations -Wextra -Wno-error=extra -Wno-unused-parameter -Wno-sign-compare -Wno-enum-conversion -gdwarf-4 -ggdb -Og -fno-shrink-wrap -fmacro-prefix-map=D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp=. -fmacro-prefix-map=C:/Users/Rusneeda/esp/v5.5.1/esp-idf=/IDF -fstrict-volatile-bitfields -fno-jump-tables -fno-tree-switch-conversion -std=gnu17 -Wno-old-style-declaration -MD -MT esp-idf/main/CMakeFiles/__idf_main.dir/Lab9-1_OLED_BringUp.c.obj -MF esp-idf\main\CMakeFiles\__idf_main.dir\Lab9-1_OLED_BringUp.c.obj.d -o esp-idf/main/CMakeFiles/__idf_main.dir/Lab9-1_OLED_BringUp.c.obj -c D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:9:8: error: unknown type name 'spi_device_handle_t'
+    9 | static spi_device_handle_t s_spi_handle = NULL;
+      |        ^~~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:9:43: error: 'NULL' undeclared here (not in a function)
+    9 | static spi_device_handle_t s_spi_handle = NULL;
+      |                                           ^~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:1:1: note: 'NULL' is defined in header '<stddef.h>'; this is probably fixable by adding '#include <stddef.h>'
+  +++ |+#include <stddef.h>
+    1 | // #include <stdio.h>
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:12:1: error: unknown type name 'esp_err_t'
+   12 | esp_err_t oled_spi_init(void)
+      | ^~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c: In function 'oled_spi_init':
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:15:5: error: unknown type name 'gpio_config_t'
+   15 |     gpio_config_t io_conf = {
+      |     ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:16:9: error: field name not in record or union initializer
+   16 |         .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:16:9: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:6:26: error: 'GPIO_NUM_2' undeclared (first use in this function)
+    6 | #define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
+      |                          ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:16:34: note: in expansion of macro 'OLED_PIN_DC'
+   16 |         .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+      |                                  ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:6:26: note: each undeclared identifier is reported only once for each function it appears in
+    6 | #define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
+      |                          ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:16:34: note: in expansion of macro 'OLED_PIN_DC'
+   16 |         .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+      |                                  ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:5:26: error: 'GPIO_NUM_4' undeclared (first use in this function)
+    5 | #define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
+      |                          ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:16:58: note: in expansion of macro 'OLED_PIN_RES'
+   16 |         .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+      |                                                          ^~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:17:9: error: field name not in record or union initializer
+   17 |         .mode = GPIO_MODE_OUTPUT,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:17:9: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:17:17: error: 'GPIO_MODE_OUTPUT' undeclared (first use in this function)
+   17 |         .mode = GPIO_MODE_OUTPUT,
+      |                 ^~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:17:17: warning: excess elements in scalar initializer
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:17:17: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:18:9: error: field name not in record or union initializer
+   18 |         .pull_up_en = GPIO_PULLUP_ENABLE,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:18:9: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:18:23: error: 'GPIO_PULLUP_ENABLE' undeclared (first use in this function)
+   18 |         .pull_up_en = GPIO_PULLUP_ENABLE,
+      |                       ^~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:18:23: warning: excess elements in scalar initializer
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:18:23: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:19:9: error: field name not in record or union initializer
+   19 |         .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:19:9: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:19:25: error: 'GPIO_PULLDOWN_DISABLE' undeclared (first use in this function)
+   19 |         .pull_down_en = GPIO_PULLDOWN_DISABLE,
+      |                         ^~~~~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:19:25: warning: excess elements in scalar initializer
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:19:25: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:20:9: error: field name not in record or union initializer
+   20 |         .intr_type = GPIO_INTR_DISABLE,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:20:9: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:20:22: error: 'GPIO_INTR_DISABLE' undeclared (first use in this function)
+   20 |         .intr_type = GPIO_INTR_DISABLE,
+      |                      ^~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:20:22: warning: excess elements in scalar initializer
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:20:22: note: (near initialization for 'io_conf')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:22:5: error: implicit declaration of function 'gpio_config' [-Wimplicit-function-declaration]
+   22 |     gpio_config(&io_conf);
+      |     ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:25:5: error: unknown type name 'spi_bus_config_t'
+   25 |     spi_bus_config_t buscfg = {
+      |     ^~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:26:9: error: field name not in record or union initializer
+   26 |         .miso_io_num = -1,               // จอนี้ Write-Only ไม่มีขา MISO
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:26:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:27:9: error: field name not in record or union initializer
+   27 |         .mosi_io_num = OLED_PIN_MOSI,     // GPIO 23
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:27:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:4:26: error: 'GPIO_NUM_23' undeclared (first use in this function)
+    4 | #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
+      |                          ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:27:24: note: in expansion of macro 'OLED_PIN_MOSI'
+   27 |         .mosi_io_num = OLED_PIN_MOSI,     // GPIO 23
+      |                        ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:4:25: warning: excess elements in scalar initializer
+    4 | #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:27:24: note: in expansion of macro 'OLED_PIN_MOSI'
+   27 |         .mosi_io_num = OLED_PIN_MOSI,     // GPIO 23
+      |                        ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:4:25: note: (near initialization for 'buscfg')
+    4 | #define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:27:24: note: in expansion of macro 'OLED_PIN_MOSI'
+   27 |         .mosi_io_num = OLED_PIN_MOSI,     // GPIO 23
+      |                        ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:28:9: error: field name not in record or union initializer
+   28 |         .sclk_io_num = OLED_PIN_SCK,      // GPIO 18
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:28:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:3:26: error: 'GPIO_NUM_18' undeclared (first use in this function)
+    3 | #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+      |                          ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:28:24: note: in expansion of macro 'OLED_PIN_SCK'
+   28 |         .sclk_io_num = OLED_PIN_SCK,      // GPIO 18
+      |                        ^~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:3:25: warning: excess elements in scalar initializer
+    3 | #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:28:24: note: in expansion of macro 'OLED_PIN_SCK'
+   28 |         .sclk_io_num = OLED_PIN_SCK,      // GPIO 18
+      |                        ^~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:3:25: note: (near initialization for 'buscfg')
+    3 | #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:28:24: note: in expansion of macro 'OLED_PIN_SCK'
+   28 |         .sclk_io_num = OLED_PIN_SCK,      // GPIO 18
+      |                        ^~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:29:9: error: field name not in record or union initializer
+   29 |         .quadwp_io_num = -1,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:29:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:29:26: warning: excess elements in scalar initializer
+   29 |         .quadwp_io_num = -1,
+      |                          ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:29:26: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:30:9: error: field name not in record or union initializer
+   30 |         .quadhd_io_num = -1,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:30:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:30:26: warning: excess elements in scalar initializer
+   30 |         .quadhd_io_num = -1,
+      |                          ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:30:26: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:31:9: error: field name not in record or union initializer
+   31 |         .max_transfer_sz = 1024 + 16,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:31:9: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:31:28: warning: excess elements in scalar initializer
+   31 |         .max_transfer_sz = 1024 + 16,
+      |                            ^~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:31:28: note: (near initialization for 'buscfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:35:5: error: unknown type name 'esp_err_t'
+   35 |     esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+      |     ^~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:35:21: error: implicit declaration of function 'spi_bus_initialize' [-Wimplicit-function-declaration]
+   35 |     esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+      |                     ^~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:35:40: error: 'SPI2_HOST' undeclared (first use in this function)
+   35 |     esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+      |                                        ^~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:35:60: error: 'SPI_DMA_CH_AUTO' undeclared (first use in this function)
+   35 |     esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+      |                                                            ^~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:36:16: error: 'ESP_OK' undeclared (first use in this function)
+   36 |     if (ret != ESP_OK) return ret;
+      |                ^~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:39:5: error: unknown type name 'spi_device_interface_config_t'
+   39 |     spi_device_interface_config_t devcfg = {
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:40:9: error: field name not in record or union initializer
+   40 |         .clock_speed_hz = 10 * 1000 * 1000, // 10 MHz แสดงผลลื่นไหล
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:40:9: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:41:9: error: field name not in record or union initializer
+   41 |         .mode = 0,                          // Mode 0: CPOL=0, CPHA=0
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:41:9: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:41:17: warning: excess elements in scalar initializer
+   41 |         .mode = 0,                          // Mode 0: CPOL=0, CPHA=0
+      |                 ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:41:17: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:42:9: error: field name not in record or union initializer
+   42 |         .spics_io_num = OLED_PIN_CS,        // GPIO 5
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:42:9: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:7:26: error: 'GPIO_NUM_5' undeclared (first use in this function)
+    7 | #define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+      |                          ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:42:25: note: in expansion of macro 'OLED_PIN_CS'
+   42 |         .spics_io_num = OLED_PIN_CS,        // GPIO 5
+      |                         ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:7:25: warning: excess elements in scalar initializer
+    7 | #define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:42:25: note: in expansion of macro 'OLED_PIN_CS'
+   42 |         .spics_io_num = OLED_PIN_CS,        // GPIO 5
+      |                         ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:7:25: note: (near initialization for 'devcfg')
+    7 | #define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+      |                         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:42:25: note: in expansion of macro 'OLED_PIN_CS'
+   42 |         .spics_io_num = OLED_PIN_CS,        // GPIO 5
+      |                         ^~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:43:9: error: field name not in record or union initializer
+   43 |         .queue_size = 7,
+      |         ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:43:9: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:43:23: warning: excess elements in scalar initializer
+   43 |         .queue_size = 7,
+      |                       ^
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:43:23: note: (near initialization for 'devcfg')
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:46:12: error: implicit declaration of function 'spi_bus_add_device' [-Wimplicit-function-declaration]
+   46 |     return spi_bus_add_device(SPI2_HOST, &devcfg, &s_spi_handle);
+      |            ^~~~~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c: At top level:
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:50:20: error: unknown type name 'uint8_t'
+   50 | void oled_send_cmd(uint8_t cmd)
+      |                    ^~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:1:1: note: 'uint8_t' is defined in header '<stdint.h>'; this is probably fixable by adding '#include <stdint.h>'
+  +++ |+#include <stdint.h>
+    1 | // #include <stdio.h>
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:61:27: error: unknown type name 'uint8_t'
+   61 | void oled_send_data(const uint8_t *data, size_t len)
+      |                           ^~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:61:27: note: 'uint8_t' is defined in header '<stdint.h>'; this is probably fixable by adding '#include <stdint.h>'
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:61:42: error: unknown type name 'size_t'
+   61 | void oled_send_data(const uint8_t *data, size_t len)
+      |                                          ^~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:61:42: note: 'size_t' is defined in header '<stddef.h>'; this is probably fixable by adding '#include <stddef.h>'
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c: In function 'app_main':
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:74:5: error: implicit declaration of function 'ESP_ERROR_CHECK' [-Wimplicit-function-declaration]
+   74 |     ESP_ERROR_CHECK(oled_spi_init());
+      |     ^~~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:77:5: error: implicit declaration of function 'gpio_set_level' [-Wimplicit-function-declaration]
+   77 |     gpio_set_level(OLED_PIN_RES, 0); // ดึง LOW เพื่อเริ่มรีเซ็ต
+      |     ^~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:5:26: error: 'GPIO_NUM_4' undeclared (first use in this function)
+    5 | #define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
+      |                          ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:77:20: note: in expansion of macro 'OLED_PIN_RES'
+   77 |     gpio_set_level(OLED_PIN_RES, 0); // ดึง LOW เพื่อเริ่มรีเซ็ต
+      |                    ^~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:78:5: error: implicit declaration of function 'vTaskDelay' [-Wimplicit-function-declaration]
+   78 |     vTaskDelay(pdMS_TO_TICKS(15));
+      |     ^~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:78:16: error: implicit declaration of function 'pdMS_TO_TICKS' [-Wimplicit-function-declaration]
+   78 |     vTaskDelay(pdMS_TO_TICKS(15));
+      |                ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:85:5: error: implicit declaration of function 'oled_send_cmd' [-Wimplicit-function-declaration]
+   85 |     oled_send_cmd(0xAE); // Display OFF
+      |     ^~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:99:5: error: unknown type name 'uint8_t'
+   99 |     uint8_t buffer[128];
+      |     ^~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:99:5: note: 'uint8_t' is defined in header '<stdint.h>'; this is probably fixable by adding '#include <stdint.h>'
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:100:5: error: implicit declaration of function 'memset' [-Wimplicit-function-declaration]
+  100 |     memset(buffer, 0xFF, sizeof(buffer));
+      |     ^~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:1:1: note: 'memset' is defined in header '<string.h>'; this is probably fixable by adding '#include <string.h>'
+  +++ |+#include <string.h>
+    1 | // #include <stdio.h>
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:104:9: error: implicit declaration of function 'oled_send_data' [-Wimplicit-function-declaration]
+  104 |         oled_send_data(buffer, sizeof(buffer));
+      |         ^~~~~~~~~~~~~~
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c: In function 'oled_spi_init':
+D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/main/Lab9-1_OLED_BringUp.c:47:1: error: control reaches end of non-void function [-Werror=return-type]
+   47 | }
+      | ^
+cc1.exe: some warnings being treated as errors
+[2/9] Performing build step for 'bootloader'
+[1/1] C:\WINDOWS\system32\cmd.exe /C "cd /D D:\1-2569\IOT\week09-Lab\Lab9-1_OLED_BringUp\build\bootloader\esp-idf\esptool_py && C:\Users\Rusneeda\.espressif\python_env\idf5.5_py3.11_env\Scripts\python.exe C:/Users/Rusneeda/esp/v5.5.1/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 D:/1-2569/IOT/week09-Lab/Lab9-1_OLED_BringUp/build/bootloader/bootloader.bin"
+Bootloader binary size 0x6680 bytes. 0x980 bytes (8%) free.
+ninja: build stopped: subcommand failed.
