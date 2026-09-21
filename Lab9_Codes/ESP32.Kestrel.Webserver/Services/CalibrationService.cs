@@ -1,3 +1,5 @@
+namespace ESP32.Kestrel.Webserver.Services;
+
 public class CalibrationSettings
 {
     public int RawMin { get; set; } = 150;     // ค่าดิบต่ำสุด (Zero Point)
@@ -10,7 +12,7 @@ public class CalibrationSettings
 public class CalibrationService
 {
     private CalibrationSettings _settings = new();
-    private string _currentOledMessage = "SYSTEM READY";
+    private string _currentOledMessage = "READY";
 
     public CalibrationSettings Settings => _settings;
     public string CurrentOledMessage => _currentOledMessage;
@@ -27,7 +29,7 @@ public class CalibrationService
 
     public void SetOledMessage(string msg)
     {
-        _currentOledMessage = msg.Length > 20 ? msg[..20] : msg;
+        _currentOledMessage = msg.Length > 16 ? msg[..16] : msg;
     }
 
     public double Compute(int rawAdc)
