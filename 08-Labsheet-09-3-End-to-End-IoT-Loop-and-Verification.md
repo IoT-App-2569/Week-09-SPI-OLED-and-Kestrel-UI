@@ -565,8 +565,7 @@ public class CalibrationService
 ```
 
 # cloud ready
-![Uploading image.png…]()
-
+<img width="4032" height="3024" alt="IMG_1898" src="https://github.com/user-attachments/assets/2662fcfa-5155-4e26-91e7-b40b0841f608" />
 
 #### ขั้นที่ 3.2.3 สร้างบริการเบื้องหลัง `Services/SerialBridgeService.cs`
 สร้างไฟล์ใหม่ชื่อ `Services/SerialBridgeService.cs` เพื่อจัดการการเชื่อมต่อ Full-Duplex Serial Stream
