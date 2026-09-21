@@ -517,7 +517,8 @@ dotnet add package System.IO.Ports
 ```
 
 # local Edge
-<img width="1200" height="600" alt="IMG_1896" src="https://github.com/user-attachments/assets/070ef813-e368-411f-ac2a-31184d119ff7" />
+<img width="4284" height="5712" alt="IMG_1896" src="https://github.com/user-attachments/assets/297cc540-b49a-4cda-a670-b280c5e75e38" />
+
 
 #### ขั้นที่ 3.2.2 ตรวจสอบไฟล์บริการปรับเทียบ `Services/CalibrationService.cs`
 ตรวจสอบว่าไฟล์ `Services/CalibrationService.cs` มีโครงสร้างรองรับการคำนวณและเก็บข้อความ (หากยังไม่มี ให้สร้างขึ้นตาม Lab 9.2)
@@ -564,7 +565,7 @@ public class CalibrationService
 ```
 
 # cloud ready
-<img width="1200" height="600" alt="image" src="https://github.com/user-attachments/assets/cbe9bafb-1350-40c9-8efc-afd23c855956" />
+![Uploading image.png…]()
 
 
 #### ขั้นที่ 3.2.3 สร้างบริการเบื้องหลัง `Services/SerialBridgeService.cs`
