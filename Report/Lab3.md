@@ -9,9 +9,9 @@
 **ผลการทดสอบ:** 
 หน้าจอ OLED สามารถวาดกราฟิกแบ่งเป็น 3 โซนได้สำเร็จ และเมื่อหมุน Potentiometer แถบ Bar Gauge มีการตอบสนองอย่างรวดเร็ว โดยโซนที่ 3 แสดงสถานะเป็น `EDGE: LOCAL EDGE`
 
-![alt text](image-1.png)
+![alt text](/Report/img2/image-1.png)
 
-![alt text](image.png)
+![alt text](/Report/img2/image.png)
 
 ---
 
@@ -21,7 +21,7 @@
 **ผลการทดสอบ:**
 เมื่อเปิด Kestrel Server หน้าจอ OLED เปลี่ยนสถานะในโซนที่ 3 เป็น `CLOUD: READY` โดยอัตโนมัติ และเมื่อหมุน Potentiometer ค่าบนหน้าจอ OLED และ SVG Bar Gauge บนหน้าเว็บขยับตรงกันแบบ Real-time และสามารถสั่งเปลี่ยนข้อความจากหน้าเว็บมาแสดงบนจอ OLED ได้สำเร็จ
 
-![alt text](image-2.png)
+![alt text](/Report/img2/image-2.png)
 
 ---
 
@@ -29,7 +29,7 @@
 
 จากการใช้คำสั่ง `Measure-Command` ร่วมกับ `curl.exe` เพื่อทดสอบยิงคำสั่งเปลี่ยนข้อความและอัปเดตหน้าจอ OLED ได้ผลลัพธ์ดังนี้
 
-![alt text](image-3.png)
+![alt text](/Report/img2/image-3.png)
 
 **สรุปผลการวัด:**
 * เวลาที่ Kestrel ใช้ในการรับคำขอและอัปเดตสถานะ (จาก HTTP Response) : **14.25** ms
