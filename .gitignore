@@ -18,6 +18,8 @@ CMakeUserPresets.json
 *.DS_Store
 **/bin/
 **/obj/
+**/.local/
+**/build/
 /Example_codes/Lab9-SPI-OLED-MultiZone/build
 /Lab9_Codes/ESP32.Kestrel.Webserver/bin
 /Lab9_Codes/ESP32.Kestrel.Webserver/obj
