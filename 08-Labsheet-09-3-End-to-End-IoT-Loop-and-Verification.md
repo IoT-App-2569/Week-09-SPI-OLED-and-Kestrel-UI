@@ -475,8 +475,11 @@ idf.py -p COMxx flash monitor
 ```powershell
 docker run --rm -w /workspace/ --mount "type=bind,source=$((Get-Location).Path),target=/workspace" espressif/idf:release-v6.1 idf.py build
 ```
-#### วิดีโอการทดลอง
+# วิดีโอการทดลอง
 https://youtube.com/shorts/SC_Brkl3u4k?feature=share
+---
+
+
 ```powershell
 # ตรวจสอบให้แน่ใจว่าอยู่ที่ root ของ project แล้ว 
 python -m esptool --chip esp32  -p COM24 -b 460800 --before default_reset --after hard_reset write_flash --flash_mode dio --flash_size 2MB --flash_freq 40m 0x1000 build/bootloader/bootloader.bin 0x8000 build/partition_table/partition-table.bin 0x10000 build/Lab9-3-ESP32-ClosedLoop.bin
@@ -744,7 +747,7 @@ app.Run();
 ```powershell
 dotnet run
 ```
-#### วิดีโอการทดลอง
+# วิดีโอการทดลอง
 https://youtube.com/shorts/s_0QQZiUs3w?feature=share
 ---
 
@@ -877,7 +880,7 @@ https://youtube.com/shorts/s_0QQZiUs3w?feature=share
 1. **ทดสอบพิมพ์ข้อความในช่อง Remote Control บนเว็บ**
    - พิมพ์ข้อความภาษาอังกฤษ เช่น `"TEST OK"` หรือ `"IoT ALERT"` แล้วกดปุ่ม **ส่งข้อความ**
    - สังเกตที่ **Zone 3 ของหน้าจอ OLED จริง** ข้อความจะต้องเปลี่ยนเป็นคำที่พิมพ์จากหน้าเว็บทันที
-#### วิดีโอการทดลอง
+# วิดีโอการทดลอง
 https://youtube.com/shorts/bAteepXMJ_0?feature=share
 ---
 
