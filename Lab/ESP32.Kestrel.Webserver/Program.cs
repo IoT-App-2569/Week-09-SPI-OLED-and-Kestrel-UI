@@ -1,32 +1,36 @@
 using ESP32.Kestrel.Webserver.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-// ลงทะเบียน Service เพื่อให้ Minimal API ดึงไปใช้งานได้ (Dependency Injection)
+
 builder.Services.AddSingleton<CalibrationService>();
+builder.Services.AddSingleton<SerialBridgeService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<SerialBridgeService>());
+
 var app = builder.Build();
 
-// Route 1: อ่านข้อมูล Telemetry (GET)
-app.MapGet("/api/telemetry", (CalibrationService cal) =>
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapGet("/api/telemetry", (CalibrationService cal, SerialBridgeService bridge) =>
 {
-    int simulatedRaw = 2048; // จำลองค่า ADC จากเซนเซอร์
-    double calibrated = cal.Compute(simulatedRaw);
     return Results.Ok(new
     {
-        raw = simulatedRaw,
-        calibrated = Math.Round(calibrated, 1),
+        raw = bridge.LatestRaw,
+        calibrated = bridge.LatestCalibrated,
         unit = cal.Settings.Unit,
         displayMsg = cal.CurrentOledMessage,
+        isConnected = bridge.IsConnected,
+        kestrelLatencyMs = bridge.LastRoundTripLatencyMs,
         timestamp = DateTime.UtcNow
     });
 });
 
-// Route 2: ปรับเทียบเซนเซอร์ (POST)
 app.MapPost("/api/potentiometer/calibrate", (CalibrationSettings newSettings, CalibrationService cal) =>
 {
     try
     {
         cal.UpdateSettings(newSettings);
-        cal.SetOledMessage("CALIBRATED OK");
+        cal.SetOledMessage("CAL OK");
         return Results.Ok(new { status = "success", settings = cal.Settings });
     }
     catch (ArgumentException ex)
@@ -35,7 +39,6 @@ app.MapPost("/api/potentiometer/calibrate", (CalibrationSettings newSettings, Ca
     }
 });
 
-// Route 3: สั่งข้อความขึ้นหน้าจอ OLED (POST)
 app.MapPost("/api/oled/message", (DisplayMessageRequest req, CalibrationService cal) =>
 {
     if (string.IsNullOrWhiteSpace(req.Message))
