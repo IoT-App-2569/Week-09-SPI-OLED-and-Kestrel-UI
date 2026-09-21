@@ -401,7 +401,11 @@ void app_main(void)
     oled_draw_string(24, 32, "ID: 65012345", true);  // โซนสีฟ้า
     oled_flush();
 }
+
 ```
+#จุดสว่างพิกเซลเดี่ยว 4 จุดตรงมุมทั้งสี่
+<img width="1206" height="676" alt="image" src="https://github.com/user-attachments/assets/f6261a79-d065-4667-9892-294db9e2b74d" />
+
 
 > [!IMPORTANT]
 > **ภารกิจสังเกตการณ์เชิงลึก (Forensic Visual Observation Challenge)**
