@@ -1,3 +1,4 @@
+namespace ESP32.Kestrel.Webserver.Services;
 public class CalibrationSettings
 {
     public int RawMin { get; set; } = 150;     // ค่าดิบต่ำสุด (Zero Point)
