@@ -9,6 +9,7 @@
 
 * **[`/Lab/ESP32.Kestrel.Webserver/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Lab/Lab9-1_OLED_BringUp)**: โฟลเดอร์โปรเจกต์ .NET (ภาษา C#) สำหรับการสร้างเว็บเซิร์ฟเวอร์ด้วย Kestrel Minimal API
 
+* **[`/Lab/Lab9-3-ESP32-ClosedLoop/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Lab/Lab9-3-ESP32-ClosedLoop)**: โฟลเดอร์โปรเจกต์ ESP-IDF (ภาษา C) สำหรับระบบวงปิด (Closed-Loop) ที่ทำงานร่วมกับเซิร์ฟเวอร์แบบ Real-time พร้อมกลไก Hybrid Edge-Cloud Fallback
 
 * **[`/Report/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Report)**: โฟลเดอร์จัดเก็บเอกสารรายงานการทดลองและหลักฐานการทำงาน
 
@@ -18,6 +19,7 @@
 
 * [`Lab2.md`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/blob/67030323/Report/Lab2.md): เอกสารรายงาน, การวิเคราะห์นิติวิทยาศาสตร์เครือข่าย (Forensics) และการทดสอบ Payload สำหรับ Kestrel Web Server
 
+* **[`Lab3.md`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/blob/67030323/Report/Lab3.md): เอกสารรายงานการบูรณาการระบบวงปิด, การตรวจสอบความสอดคล้องของข้อมูล (Co-Verification) และการตรวจวัดความหน่วงเวลา (Latency Forensics)**
 
 * [`/img/`](https://github.com/pornprompoh/Week-09-SPI-OLED-and-Kestrel-UI/tree/67030323/Report/img): รูปภาพ Screenshot ของผลลัพธ์จาก Serial Monitor, HTTP Status Codes และการทดสอบผ่าน Terminal
 
