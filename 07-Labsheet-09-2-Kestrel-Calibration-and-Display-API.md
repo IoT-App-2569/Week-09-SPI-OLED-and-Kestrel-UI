@@ -381,8 +381,12 @@ Server: Kestrel
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+ตอบ การคำนวณสเกลที่ฝั่ง Kestrel ทำให้ปรับค่า Calibration ได้ผ่าน API ทันทีโดยไม่ต้องแฟลชเฟิร์มแวร์ ESP32 ใหม่ ตัว ESP32 ส่งแค่ค่า Raw ADC จึงเฟิร์มแวร์เรียบง่ายและกินทรัพยากรน้อย นอกจากนี้ยังจัดการอุปกรณ์หลายตัวได้จากศูนย์กลางที่เดียว และเก็บค่าดิบไว้คำนวณย้อนหลังได้ถ้าตั้งค่าผิด
+
 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+ตอบ ถ้าไม่ตรวจเงื่อนไข ผลจะขึ้นกับกรณี ถ้า `RawMax < RawMin` ฟังก์ชัน `Math.Clamp` จะโยน `ArgumentException` เพราะค่า min มากกว่า max แต่ถ้า `RawMax == RawMin` จะไม่เกิด `DivideByZeroException` เพราะสูตรคำนวณเป็น `double` ได้ค่า `NaN` หรือ `Infinity` แทน ซึ่งจะทำให้ serialize JSON ตอนตอบ `/api/telemetry` ล้มเหลว ผลคือ request นั้นได้ `500 Internal Server Error` แต่ Kestrel ไม่ล่ม เพราะแต่ละ request แยกกัน อย่างไรก็ตามค่าที่ผิดถูกเก็บลง Settings ไปแล้ว ทำให้ทุก request ที่ตามมาพังต่อเนื่องจนกว่าจะ Calibrate ค่าที่ถูกต้องเข้าไปใหม่
+
 3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
 
-
+ตอบ Minimal API จะ bind ออบเจ็กต์อย่าง `CalibrationSettings` จาก Request Body โดยดูค่า `Content-Type` เพื่อเลือกตัวถอดรหัส ถ้าไม่มี header นี้หรือเป็นชนิดอื่น (เช่น `curl -d` ที่ตั้งเป็น `application/x-www-form-urlencoded` โดยปริยาย) เซิร์ฟเวอร์จะไม่รู้ว่า body เป็น JSON และไม่เดาให้ จึงปฏิเสธด้วย `415 Unsupported Media Type`
 

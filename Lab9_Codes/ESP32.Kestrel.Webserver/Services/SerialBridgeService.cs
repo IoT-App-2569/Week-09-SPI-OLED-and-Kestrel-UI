@@ -29,7 +29,7 @@ public class SerialBridgeService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // อ่านค่า COM Port จาก config หรือกำหนดค่ามาตรฐาน
-        string portName = _config["SerialPort:PortName"] ?? "COM24"; // <-- แก้ไขให้ตรงกับพอร์ต ESP32 ของนักศึกษา
+        string portName = _config["SerialPort:PortName"] ?? "COM5"; // <-- แก้ไขให้ตรงกับพอร์ต ESP32 ของนักศึกษา
         int baudRate = 115200;
 
         _logger.LogInformation("กำลังเปิดการเชื่อมต่อ Serial Port: {Port} ที่ BaudRate {Baud}", portName, baudRate);
@@ -40,11 +40,13 @@ public class SerialBridgeService : BackgroundService
             {
                 if (_serialPort == null || !_serialPort.IsOpen)
                 {
-                    _serialPort = new SerialPort(portName, baudRate)
+                   _serialPort = new SerialPort(portName, baudRate)
                     {
                         NewLine = "\n",
                         ReadTimeout = 2000,
-                        WriteTimeout = 500
+                        WriteTimeout = 500,
+                        DtrEnable = false,
+                        RtsEnable = false
                     };
                     _serialPort.Open();
                     _logger.LogInformation("เชื่อมต่อพอร์ต {Port} สำเร็จ!", portName);
@@ -77,8 +79,7 @@ public class SerialBridgeService : BackgroundService
                         _serialPort.Write(txCommand);
 
                         // บันทึกความหน่วงเวลาโดยประมาณของ Kestrel
-                        long elapsedNanos = Stopwatch.GetElapsedTime(receiveTime).Ticks * 100;
-                        LastRoundTripLatencyMs = elapsedNanos / 1_000_000;
+                        LastRoundTripLatencyMs = (long)Stopwatch.GetElapsedTime(receiveTime).TotalMilliseconds;
                     }
                 }
             }

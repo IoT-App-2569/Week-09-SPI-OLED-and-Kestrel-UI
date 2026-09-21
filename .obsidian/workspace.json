@@ -1,0 +1,214 @@
+{
+  "main": {
+    "id": "25251a77cc9a5fa3",
+    "type": "split",
+    "children": [
+      {
+        "id": "138efc130f1f0a0d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "68d49782928f10a2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "be460bea504497f6",
+    "type": "split",
+    "children": [
+      {
+        "id": "c93f96ff006c752d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8064431ed1bf53e8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "File explorer"
+            }
+          },
+          {
+            "id": "e0c40fb90de89027",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "ค้นหา"
+            }
+          },
+          {
+            "id": "19a3f2bbe664f771",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "บุ๊กมาร์ก"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "8134588fa462291f",
+    "type": "split",
+    "children": [
+      {
+        "id": "be23a23e89790d18",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ad922499cc35cd72",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "แบ็คลิงค์"
+            }
+          },
+          {
+            "id": "64790788865ae5bf",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "ลิงค์ขาออก"
+            }
+          },
+          {
+            "id": "9c4ba1136b265239",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "แท็ก"
+            }
+          },
+          {
+            "id": "02bc025615385074",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "คุณสมบัติทั้งหมด"
+            }
+          },
+          {
+            "id": "f904fc7842b6212a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "โครงเรื่อง"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:เปิด quick switcher": false,
+      "graph:เปิดมุมมองกราฟ": false,
+      "canvas:สร้างผืนผ้าใบใหม่": false,
+      "daily-notes:เปิดโน้ตของวันนี้": false,
+      "templates:แทรกเทมเพลต": false,
+      "command-palette:เปิดกระดานคำสั่ง": false,
+      "bases:สร้างฐานใหม่": false
+    }
+  },
+  "active": "68d49782928f10a2",
+  "lastOpenFiles": [
+    "08-Labsheet-09-3-End-to-End-IoT-Loop-and-Verification.md",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/log/idf_py_stdout_output_31232",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/log/idf_py_stderr_output_31232",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/bootloader/CMakeFiles/CMakeScratch",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/spiffs/libspiffs.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/rt/librt.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/perfmon/libperfmon.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/nvs_sec_provider/libnvs_sec_provider.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/mqtt/libmqtt.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/json/libjson.a",
+    "Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build/esp-idf/fatfs/libfatfs.a",
+    "03-Graphics-Rendering-Engine-and-Font-Bitmaps.md",
+    "04-Closed-Loop-IoT-Pipeline-and-Calibration.md",
+    "06-Labsheet-09-1-SPI-OLED-Deconstructed-Bringup.md",
+    "Images/OLED_Display_Zone.svg",
+    "Images/Closed-Loop System Flow.svg",
+    "Images/Closed-Loop System Flow.drawio.svg",
+    "Example_codes/Lab9-1-SPI-OLED-Bringup/Build_with_docker_idf6.md",
+    "07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md",
+    "09-Labsheet-09-4-Troubleshooting-and-Fault-Clinic.md"
+  ]
+}
