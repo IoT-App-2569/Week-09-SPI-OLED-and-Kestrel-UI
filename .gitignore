@@ -14,3 +14,14 @@ CMakeUserPresets.json
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build
 /Example_codes/Lab9-1_OLED_BringUp/build
+
+# Build artifacts and compiler outputs
+build/
+**/build/
+bin/
+**/bin/
+obj/
+**/obj/
+
+# Editor and IDE settings
+.vscode/
