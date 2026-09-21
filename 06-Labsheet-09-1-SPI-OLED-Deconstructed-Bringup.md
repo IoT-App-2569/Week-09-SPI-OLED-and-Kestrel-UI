@@ -210,7 +210,7 @@ void app_main(void)
 
 ---
 #แถบสีเหลืองด้านบน + สีฟ้า
-<img width="2000" height="2000" alt="IMG_1662" src="https://github.com/user-attachments/assets/2f5da9cc-086d-4329-9b16-fa3c1476e191" />
+<img width="2500" height="1500" alt="IMG_1662" src="https://github.com/user-attachments/assets/2f5da9cc-086d-4329-9b16-fa3c1476e191" />
 ---
 
 ---
