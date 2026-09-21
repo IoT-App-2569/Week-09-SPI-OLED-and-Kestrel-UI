@@ -516,6 +516,9 @@ cd ../ESP32.Kestrel.Webserver
 dotnet add package System.IO.Ports
 ```
 
+# local Edge
+![Uploading IMG_1896.jpg…]()
+
 #### ขั้นที่ 3.2.2 ตรวจสอบไฟล์บริการปรับเทียบ `Services/CalibrationService.cs`
 ตรวจสอบว่าไฟล์ `Services/CalibrationService.cs` มีโครงสร้างรองรับการคำนวณและเก็บข้อความ (หากยังไม่มี ให้สร้างขึ้นตาม Lab 9.2)
 
@@ -559,6 +562,10 @@ public class CalibrationService
     }
 }
 ```
+
+# cloud ready
+<img width="1200" height="600" alt="image" src="https://github.com/user-attachments/assets/cbe9bafb-1350-40c9-8efc-afd23c855956" />
+
 
 #### ขั้นที่ 3.2.3 สร้างบริการเบื้องหลัง `Services/SerialBridgeService.cs`
 สร้างไฟล์ใหม่ชื่อ `Services/SerialBridgeService.cs` เพื่อจัดการการเชื่อมต่อ Full-Duplex Serial Stream
