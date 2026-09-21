@@ -381,8 +381,47 @@ Server: Kestrel
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+```
+การบริหารจัดการและการอัปเดตแบบรวมศูนย์ (Centralized Configuration & Management)
+
+หากต้องมีการเปลี่ยนค่าพารามิเตอร์การปรับเทียบ (เช่น ค่า Zero/Span หรือเปลี่ยนหน่วยวัดจาก % เป็น RPM) วิศวกรสามารถอัปเดตหรือส่ง API Request มาที่ Kestrel Server ได้ทันทีโดยไม่ต้องแฟลชโค้ด (Re-flash Firmware) ใหม่ลงใน ESP32 ทุกๆ เครื่องที่ติดตั้งอยู่ตามจุดต่างๆ
+
+การลดภาระประมวลผลของไมโครคอนโทรลเลอร์ (Resource & Power Optimization)
+
+ไมโครคอนโทรลเลอร์อย่าง ESP32 มีทรัพยากร (CPU/RAM) และพลังงานที่จำกัด การให้ ESP32 ทำหน้าที่เพียงอ่านค่าแอนะล็อกดิบ (Raw ADC) แล้วส่งต่อไปยังเซิร์ฟเวอร์ จะช่วยลดภาระงานคำนวณเลขทศนิยม (Floating-point Operation) และประหยัดพลังงานได้มากกว่า
+
+ความยืดหยุ่นในการขยายระบบ (Scalability & Data Integrity)
+
+ค่า Raw Data ที่ส่งมาจาก ESP32 คือข้อมูลบริสุทธิ์ (Raw Ground Truth) ซึ่งสามารถนำมาเข้าเอนจินการปรับเทียบย้อนหลัง (Post-processing) หรือประยุกต์ใช้โมเดลการปรับเทียบขั้นสูง (เช่น Non-linear / Polynomial Calibration) บน Server ได้หลากหลายรูปแบบ โดยไม่เสียข้อมูลดั้งเดิมไป
+```
 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+```
+ชนิดของ Exception
+
+หากไม่มีการตรวจจับ RawMax <= RawMin แล้วมีการส่งค่า RawMax เท่ากับ RawMin เข้ามา (เช่น RawMax = 100, RawMin = 100) ในขั้นตอนการคำนวณ Compute() ตัวหารจะเป็น (_settings.RawMax - _settings.RawMin) ซึ่งเท่ากับ 0
+
+ใน C# การหารตัวเลขประเภท Floating-point (double) ด้วย 0.0 จะไม่โยน (Throw) DivideByZeroException แต่จะคืนค่าเป็น double.PositiveInfinity หรือ double.NaN (Not a Number)
+
+แต่หากค่าถูกนำไป Cast เป็น int ในบางจุด หรือหากมีการตรวจสอบขอบเขตขัดแย้งกัน อาจทำให้เกิด DivideByZeroException (กรณีใช้ integer arithmetic) หรือเกิด ArgumentException จากฟังก์ชัน Math.Clamp() (เนื่องจาก Math.Clamp(value, min, max) จะโยน Exception ทันทีถ้า min > max)
+
+ผลกระทบต่อการทำงานของเซิร์ฟเวอร์
+
+กรณีค่ากลายเป็น NaN หรือ Infinity ค่าผลลัพธ์ Telemetry ที่ส่งออกไปในรูปแบบ JSON จะผิดเพี้ยน ทำให้แอปพลิเคชันฝั่ง Client หรือ Dashboard ที่รับข้อมูลไปใช้งานทำงานผิดพลาด (Data Corruption)
+
+กรณีเกิด Unhandled Exception หากไม่มีการ try-catch จัดการ Exception ดังกล่าว Kestrel Server จะตอบกลับไคลเอนต์ด้วย HTTP 500 Internal Server Error ซึ่งแสดงถึงความบกพร่องของระบบ และหากเกิดขึ้นซ้ำๆ หรือไม่มี Middleware รองรับ อาจส่งผลกระทบต่อความเสถียร (Availability) ของบริการ IoT ได้
+```
 3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+```
+การตรวจสอบ Content Negotiation บน Kestrel Framework
 
+ใน Minimal API ของ .NET (Kestrel) เมื่อกำหนดรับ Parameter เป็น C# Object (เช่น DisplayMessageRequest req หรือ CalibrationSettings newSettings) ตัว API Framework จะใช้ Body Binding Engine (System.Text.Json) ในการแปลง (Deserialize) ข้อมูลจาก HTTP Request Body ให้เป็น C# Object
 
+หน้าที่ของ Header Content-Type
+
+Header Content-Type application/json เป็นตัวระบุตกลงสัญญา (Contract) ในชั้น Application Layer บอกให้ Kestrel ทราบว่าข้อมูลสตรีมไบต์ (Raw Stream) ที่ส่งมาใน Request Body อยู่ในรูปแบบข้อความโครงสร้าง JSON
+
+สาเหตุที่เกิด HTTP 415
+
+หากผู้ใช้ละเลยการส่ง Header Content-Type ตัว Kestrel จะไม่สามารถยืนยัน ฟอร์แมตของข้อมูลที่ส่งมาได้ (หรือตีความว่าเป็น text/plain, application/x-www-form-urlencoded ฯลฯ) Framework จึงปฏิเสธคำขอนั้นทันทีที่ชั้น Routing/Model Binding โดยส่งรหัสสถานะ 415 Unsupported Media Type เพื่อป้องกันไม่ให้เซิร์ฟเวอร์เสียเวลาอ่านหรือพยายาม Deserialize ข้อมูลที่ไม่ถูกต้องตามข้อตกลง
+```
 
