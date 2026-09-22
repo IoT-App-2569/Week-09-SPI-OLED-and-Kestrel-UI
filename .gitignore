@@ -1,21 +1,57 @@
-# CMake generated files
+# ==========================================
+# macOS System Files
+# ==========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ==========================================
+# .NET / C# / Kestrel Webserver
+# ==========================================
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+appsettings.Development.json
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+
+# ==========================================
+# CMake / C / C++ Build Artifacts
+# ==========================================
 CMakeLists.txt.user
 CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
+CMakeFiles/
+CMakeScripts/
+Testing/
 Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-_deps
+_deps/
 CMakeUserPresets.json
 
-# Backup files
-*.bkp
-
-# ESP-IDF build directories
+# ==========================================
+# ESP-IDF & Embedded Builds
+# ==========================================
+build/
+build-*/
+sdkconfig.old
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6/
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build/
 /Example_codes/Lab9-1_OLED_BringUp/build/
+
+# ==========================================
+# Editor & Backup Files
+# ==========================================
+*.bkp
+*.save
+*.swp
+*.bak
+*~
