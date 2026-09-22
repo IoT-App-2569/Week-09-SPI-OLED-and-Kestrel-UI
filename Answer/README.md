@@ -11,8 +11,9 @@
 | :---: | :--- | :--- | :--- | :---: |
 | **9.1** | SPI OLED Deconstructed Bring-up & Framebuffer Forensics | **[answer-lab-9-1.md](answer-lab-9-1.md)** | [`Code/Lab9-1_OLED_BringUp/`](../Code/Lab9-1_OLED_BringUp/) | ✅ เสร็จ |
 | **9.2** | Kestrel Calibration Engine & Display API | **[answer-lab-9-2.md](answer-lab-9-2.md)** | [`Code/Lab9-2_Kestrel_Webserver/`](../Code/Lab9-2_Kestrel_Webserver/) | ✅ เสร็จ |
+| **9.3** | Closed-Loop IoT Integration & Hybrid Edge-Cloud Fallback | **[answer-lab-9-3.md](answer-lab-9-3.md)** | [`Code/Lab9-3_ClosedLoop/`](../Code/Lab9-3_ClosedLoop/) | ⚠️ เซิร์ฟเวอร์เสร็จ+ทดสอบแล้ว / เฟิร์มแวร์ยังไม่ได้คอมไพล์ (ไม่มี ESP-IDF บนเครื่อง) |
 
-> ใบงาน 9.3 และ 9.4 เป็นรายละเอียดเพิ่มเติม (ไม่อยู่ในขอบเขตงานที่ส่งครั้งนี้)
+> ใบงาน 9.4 เป็นรายละเอียดเพิ่มเติม (ไม่อยู่ในขอบเขตงานที่ส่งครั้งนี้)
 
 **หลักฐานภาพหน้าจอ:** [`Image/`](../Image/) — ภาพ Terminal จริงระหว่างทดสอบ API ของใบงาน 9.2 ครบ 8 ภาพ (ฝังอยู่ใน [answer-lab-9-2.md](answer-lab-9-2.md) แล้ว)
 
@@ -37,3 +38,12 @@
 * **Fault Injection ครบ 4 กรณี** (400 / 400 / 415 / 404) — เซิร์ฟเวอร์ไม่ล่ม
 * บันทึกบั๊กการ escape สตริงบน PowerShell ที่เจอระหว่างทดสอบ
 * คำตอบคำถามท้ายบท 3 ข้อ (รวมประเด็น `NaN` ที่ยืนยันด้วยการทดลองจริง)
+
+### [ใบงาน 9.3](answer-lab-9-3.md) — Closed-Loop Integration & Hybrid Edge-Cloud Fallback
+
+* สถาปัตยกรรม Full-Duplex Serial Bridge: `ADC:<raw>,<uptime>\n` ↔ `SET:<percent>:<message>\n`
+* Hybrid Edge-Cloud Fallback (Heartbeat Timeout 1,500 ms) พร้อมคำอธิบายเหตุผลเชิงวิศวกรรม
+* **พบและแก้บั๊ก 2 จุดในโค้ดต้นฉบับของใบงาน** — ชื่อไฟล์ผิดใน `CMakeLists.txt` และ Race Condition บน `CalibrationService`
+* ทดสอบเซิร์ฟเวอร์จริงครบทุก Endpoint + ผ่านเบราว์เซอร์จริง (ไม่มีบอร์ดต่ออยู่ก็ยังรันได้โดยไม่ล่ม)
+* Checklist Co-Verification และ Checkpoint สำหรับทดสอบกับบอร์ดจริง
+* คำตอบคำถามท้ายบท 3 ข้อ (Bottleneck Analysis พร้อมคำนวณอัตราเร็ว SPI vs UART)

@@ -1,6 +1,6 @@
 # Code — Week 09: SPI OLED & Kestrel UI
 
-โค้ดที่ส่งสำหรับใบงาน 9.1 และ 9.2 · **รหัสนักศึกษา 67030098** · branch `67030098-HW`
+โค้ดที่ส่งสำหรับใบงาน 9.1, 9.2 และ 9.3 · **รหัสนักศึกษา 67030098** · branch `67030098-HW`
 
 ---
 
@@ -42,7 +42,7 @@ idf.py -p COM24 flash monitor
 docker run --rm -w /workspace/ --mount "type=bind,source=$((Get-Location).Path),target=/workspace" espressif/idf:release-v6.1 idf.py build
 ```
 
-**ลำดับภาพที่ต้องเห็น:** จอขาวทั้งแผ่น 1.5 วิ → จุด 4 มุมจอ 1.5 วิ → ข้อความ `HELLO WORLD` + `ID: 65012345`
+**ลำดับภาพที่ต้องเห็น:** จอขาวทั้งแผ่น 1.5 วิ → จุด 4 มุมจอ 1.5 วิ → ข้อความ `HELLO WORLD` + `ID: 67030098`
 
 > ⚠️ ภาพจะแสดง **กลับหัว 180 องศา** ซึ่งเป็นพฤติกรรมที่ถูกต้องตามที่ใบงาน 9.1 กำหนดไว้
 > (จงใจละคำสั่ง `0xA1` และ `0xC8` เพื่อนำไปวิเคราะห์ต่อ — ดูคำอธิบายใน [Answer 9.1](../Answer/answer-lab-9-1.md))
@@ -90,9 +90,62 @@ curl.exe -i http://localhost:5117/api/telemetry
 
 ---
 
+## 3. [`Lab9-3_ClosedLoop/`](Lab9-3_ClosedLoop/) — ใบงาน 9.3
+
+ระบบ IoT วงปิดแบบสมบูรณ์: Potentiometer → ESP32 ADC1 → Kestrel (Full-Duplex Serial Bridge) → จอ OLED + Web Dashboard พร้อมกลไก **Hybrid Edge-Cloud Fallback**
+
+```
+Lab9-3_ClosedLoop/
+├── firmware/Lab9-3-ESP32-ClosedLoop/     ← เฟิร์มแวร์ ESP-IDF
+│   ├── CMakeLists.txt
+│   └── main/
+│       ├── CMakeLists.txt                ← แก้บั๊ก SRCS จากใบงานให้ตรงชื่อไฟล์จริง
+│       ├── font5x7.h
+│       └── main.c
+└── server/ESP32.Kestrel.ClosedLoop/      ← ต่อยอด Kestrel จาก Lab 9.2
+    ├── Program.cs
+    ├── Services/
+    │   ├── CalibrationService.cs         ← เพิ่ม lock กัน Race Condition
+    │   ├── DisplayMessageRequest.cs
+    │   └── SerialBridgeService.cs        ← Two-Way Serial Bridge (BackgroundService)
+    ├── appsettings.json                  ← ตั้งพอร์ต COM ที่ SerialPort:PortName
+    └── wwwroot/index.html                ← Dashboard SVG + badge สถานะการเชื่อมต่อ
+```
+
+**โปรโตคอล Serial (115200 8N1):**
+
+| ทิศทาง | รูปแบบ | ความถี่ |
+| :--- | :--- | :---: |
+| ESP32 → Kestrel | `ADC:<raw>,<uptime_ms>\n` | 20 Hz |
+| Kestrel → ESP32 | `SET:<percent>:<message>\n` | ตามรอบที่รับข้อมูลเข้า |
+
+**Hybrid Edge-Cloud Fallback:** ถ้า ESP32 ไม่ได้รับ `SET:` ภายใน 1,500 ms จะสลับไปคำนวณเปอร์เซ็นต์เองแบบ Local Edge Scaling ทันที และแสดง `EDGE: LOCAL EDGE` แทน `CLOUD: ...`
+
+### วิธีรันเซิร์ฟเวอร์ (ทดสอบได้ทันที ไม่ต้องมีบอร์ด)
+
+```bash
+cd Lab9-3_ClosedLoop/server/ESP32.Kestrel.ClosedLoop
+dotnet run
+```
+
+เปิดเบราว์เซอร์ที่ `http://localhost:5127/`
+
+### วิธี build เฟิร์มแวร์ (ต้องมี ESP-IDF v6.x หรือ Docker)
+
+```powershell
+cd Lab9-3_ClosedLoop/firmware/Lab9-3-ESP32-ClosedLoop
+idf.py set-target esp32
+idf.py build
+idf.py -p COM3 flash monitor
+```
+
+รายละเอียดบั๊กที่พบในโค้ดต้นฉบับของใบงาน (และวิธีแก้), ผลทดสอบเต็มรูปแบบ, Checklist Co-Verification และเฉลยคำถามท้ายบท อยู่ใน [Answer 9.3](../Answer/answer-lab-9-3.md)
+
+---
+
 ## สภาพแวดล้อมที่ใช้พัฒนาและทดสอบ
 
 | เครื่องมือ | เวอร์ชัน | สถานะการทดสอบ |
 | :--- | :--- | :--- |
-| .NET SDK | 10.0.400 | ✅ Build ผ่าน + รันทดสอบ API จริงครบทุก Endpoint |
-| ESP-IDF | v6.x (ตามใบงาน) | เขียนตามสถาปัตยกรรม ESP-IDF v5/v6 (ยังไม่ได้คอมไพล์บนเครื่องนี้ เพราะไม่ได้ติดตั้ง toolchain) |
+| .NET SDK | 10.0.400 | ✅ Build ผ่าน + รันทดสอบ API จริงครบทุก Endpoint (Lab 9.2 และ 9.3) |
+| ESP-IDF | v6.x (ตามใบงาน) | เขียนตามสถาปัตยกรรม ESP-IDF v5/v6 (ยังไม่ได้คอมไพล์บนเครื่องนี้ เพราะไม่ได้ติดตั้ง toolchain — ทั้ง Lab 9.1 และ 9.3) |

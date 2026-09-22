@@ -26,3 +26,4 @@ Code/**/dependencies.lock
 # .NET build output
 Code/**/bin/
 Code/**/obj/
+.vscode/
