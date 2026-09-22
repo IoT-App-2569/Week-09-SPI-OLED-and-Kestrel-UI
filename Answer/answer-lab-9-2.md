@@ -1,119 +1,81 @@
-# เฉลย / รายงานผลใบงานที่ 9.2 (Answer Lab 9.2)
-### เอนจินปรับเทียบเซนเซอร์และ API ควบคุมการแสดงผลบน Kestrel Web Server พร้อม HTTP Payload Forensics
+# คำตอบใบงานที่ 9.2
+### เอนจินปรับเทียบเซนเซอร์ และ API ควบคุมจอ OLED บน Kestrel Web Server
 
-| หัวข้อ | รายละเอียด |
+| | |
 | :--- | :--- |
-| **รหัสนักศึกษา** | 67030098 |
-| **ใบงาน** | [07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md](../07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md) |
-| **โค้ดที่ส่ง** | [`Code/Lab9-2_Kestrel_Webserver/`](../Code/Lab9-2_Kestrel_Webserver/) |
-| **ไฟล์หลัก** | [`Program.cs`](../Code/Lab9-2_Kestrel_Webserver/ESP32.Kestrel.Webserver/Program.cs), [`Services/CalibrationService.cs`](../Code/Lab9-2_Kestrel_Webserver/ESP32.Kestrel.Webserver/Services/CalibrationService.cs) |
-| **เฟรมเวิร์ก** | .NET 10 Minimal API (Kestrel) — พอร์ต `5117` |
-| **สถานะการทดสอบ** | ✅ Build ผ่าน 0 Warning 0 Error / ทดสอบครบ 3 Endpoint + 4 Fault Case (รันจริงบนเครื่อง มีภาพหน้าจอยืนยันทุกขั้นตอน) |
-| **หลักฐานภาพ** | [`Image/`](../Image/) — ภาพหน้าจอ Terminal จริงระหว่างทดสอบ 8 ภาพ |
+| รหัสนักศึกษา | 67030098 |
+| ใบงาน | [07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md](../07-Labsheet-09-2-Kestrel-Calibration-and-Display-API.md) |
+| โค้ด | [`Code/Lab9-2_Kestrel_Webserver/`](../Code/Lab9-2_Kestrel_Webserver/) |
+| เฟรมเวิร์ก | .NET 10 Minimal API พอร์ต `5117` |
+| สถานะ | build ผ่าน 0 error รันจริงและทดสอบครบทุก endpoint พร้อมภาพหน้าจอ |
 
 ---
 
-## 1. โครงสร้าง REST API ที่สร้าง
+## API ที่สร้าง
 
 ```
-[ Kestrel Web Server : http://localhost:5117 ]
-  ├── GET  /api/telemetry                : สตรีมค่า Raw ADC, Calibrated Value, ข้อความปัจจุบัน
-  ├── POST /api/potentiometer/calibrate  : ปรับเทียบ Zero & Span
-  └── POST /api/oled/message             : Broadcast ข้อความไปยังจอ OLED
+GET  /api/telemetry                : ดูค่า Raw ADC, ค่าที่ปรับเทียบแล้ว, ข้อความปัจจุบัน
+POST /api/potentiometer/calibrate  : ตั้งค่าปรับเทียบ zero/span
+POST /api/oled/message             : ส่งข้อความไปแสดงบนจอ OLED
 ```
 
 ---
 
-## 2. ผลการทดลองแต่ละกิจกรรม
+## Calibration Service
 
-### กิจกรรมที่ 2.1 — Calibration Service
-
-สูตร Two-Point Linear Calibration ที่ใช้
+สูตร Two-Point Linear Calibration:
 
 $$V_{out} = \frac{\text{clamp}(ADC_{raw}) - ADC_{min}}{ADC_{max} - ADC_{min}} \times (Scale_{max} - Scale_{min}) + Scale_{min}$$
 
-**กลไกป้องกันความผิดพลาด 2 ชั้นที่ใส่ไว้**
+ใส่กันชน 2 จุดไว้:
+- ถ้า `RawMax <= RawMin` จะ throw error ทันที กันตัวหารเป็นศูนย์หรือติดลบ
+- ใช้ `Math.Clamp` บีบค่า ADC ให้อยู่ในช่วงที่กำหนดก่อนคำนวณ กันผลลัพธ์ทะลุ 0-100%
 
-| กลไก | โค้ด | ป้องกันอะไร |
-| :--- | :--- | :--- |
-| Divide-by-Zero Guard | `if (newSettings.RawMax <= newSettings.RawMin) throw` | ตัวหาร `RawMax - RawMin` กลายเป็น 0 หรือติดลบ |
-| Out-of-Bounds Clamping | `Math.Clamp(rawAdc, RawMin, RawMax)` | ค่า ADC ที่หลุดช่วง ทำให้ผลลัพธ์ทะลุ 0–100% |
+สิ่งที่เพิ่มเข้าไปเอง (ใบงานไม่ได้บอก): `CalibrationService` เป็น Singleton ถูกเรียกพร้อมกันจากหลาย request ได้ เลยใส่ `lock` กันตอนอ่าน/เขียนค่าไว้ด้วย และถ้า `Unit` ที่ส่งมาว่างเปล่าจะ fallback เป็น `"%"` แทนที่จะปล่อยว่างซึ่งทำให้หน้าเว็บแสดงผลแปลกๆ
 
-**สิ่งที่เพิ่มเติมจากใบงาน (พร้อมเหตุผล)**
+## การผูก Route
 
-* `CalibrationService` ลงทะเบียนเป็น **Singleton** จึงถูกเรียกพร้อมกันจากหลาย HTTP Request ได้ ผมจึงใส่ `lock` ป้องกัน Race Condition ตอนอ่าน/เขียน `_settings` และ `_currentOledMessage`
-* ถ้า `Unit` ที่ส่งมาว่างเปล่า จะ fallback เป็น `"%"` แทนที่จะปล่อยเป็นสตริงว่างซึ่งทำให้หน้าเว็บแสดงผลแปลก
-
----
-
-### กิจกรรมที่ 2.2 — ผูก Minimal API Routes
-
-จุดสำคัญคือ Minimal API ทำ **Model Binding จาก JSON Body อัตโนมัติ** เมื่อพารามิเตอร์เป็น Complex Type
+จุดที่น่าสนใจคือ Minimal API ผูก JSON Body กับ Complex Type ให้อัตโนมัติ:
 
 ```csharp
 app.MapPost("/api/potentiometer/calibrate",
     (CalibrationSettings newSettings, CalibrationService cal) => { ... });
-//   └─ ผูกจาก JSON Body           └─ ผูกจาก DI Container
 ```
 
-ASP.NET Core แยกแยะเองว่า `CalibrationSettings` ไม่ได้ลงทะเบียนใน DI จึงต้องมาจาก Body ส่วน `CalibrationService` ลงทะเบียนไว้แล้วจึงฉีดจาก DI — และ JSON binding เป็นแบบ **case-insensitive** ดังนั้น `"rawMin"` (camelCase) จึงจับคู่กับ property `RawMin` (PascalCase) ได้
+`CalibrationSettings` ไม่ได้ลงทะเบียนใน DI จึงรู้ว่าต้องมาจาก Body ส่วน `CalibrationService` ลงทะเบียนไว้แล้วจึงฉีดจาก DI แทน และ JSON binding เป็นแบบไม่สนตัวพิมพ์เล็กใหญ่ ดังนั้น `"rawMin"` จาก JSON จับคู่กับ property `RawMin` ได้พอดี
 
 ---
 
-## 3. ผลการตรวจพิสูจน์หลักฐานเครือข่าย (HTTP Payload Forensics)
+## ผลทดสอบจริง
 
-### กิจกรรม 2.1 — ทดสอบ API ครบ 3 รูปแบบ (ผลจริงที่รันได้)
-
-#### 0) ตรวจ Root Endpoint ก่อนเริ่มทดสอบ API
-
-เปิดเบราว์เซอร์ไปที่ `http://localhost:5117/` เพื่อยืนยันว่าเซิร์ฟเวอร์รันขึ้นและตอบสนองจริงก่อนยิง API
+### ก่อนเริ่ม — เช็คว่าเซิร์ฟเวอร์ขึ้นจริง
 
 ![Browser Hello World](../Image/02-browser-helloworld.png)
 
-✅ เห็นข้อความ `Hello World!` — ยืนยันว่า Kestrel รับ Request ทาง HTTP ได้ปกติ พร้อมเริ่มทดสอบ Endpoint จริง
+เปิด `http://localhost:5117/` เห็น `Hello World!` แปลว่าเซิร์ฟเวอร์รันแล้วพร้อมทดสอบ API
 
----
-
-#### 1) GET /api/telemetry
+### GET /api/telemetry
 
 ```powershell
 curl.exe -i -X GET http://localhost:5117/api/telemetry
 ```
 
-**ภาพหน้าจอ Terminal จริง**
-
 ![GET telemetry](../Image/01-get-telemetry.png)
-
-**Raw Response ที่ได้จริง (ถอดจากภาพ)**
 
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
-Date: Tue, 15 Sep 2026 03:26:41 GMT
 Server: Kestrel
 Transfer-Encoding: chunked
 
 {"raw":2048,"calibrated":49.9,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-15T03:26:41.350458Z"}
 ```
 
-> **🔍 ข้อสังเกตเชิงนิติวิทยาศาสตร์:** ใบงานยกตัวอย่างว่าจะได้ `calibrated: 50.0` แต่ค่าจริงคือ **49.9**
-> ไม่ใช่บั๊ก — เป็นผลจากค่า default ที่ **ไม่สมมาตร** คือ `RawMin = 150`, `RawMax = 3950`
->
-> $$\frac{2048 - 150}{3950 - 150} \times 100 = \frac{1898}{3800} \times 100 = 49.947\ldots \approx 49.9$$
->
-> จุดกึ่งกลางจริงของช่วงนี้คือ ADC = 2050 ไม่ใช่ 2048 กรณีนี้แสดงให้เห็นว่า **การ Calibrate ทำให้ "ครึ่งทางของ ADC" ไม่เท่ากับ "ครึ่งทางของสเกลผลลัพธ์" อีกต่อไป** ซึ่งเป็นหัวใจของการปรับเทียบเซนเซอร์
+สังเกตว่าค่า `calibrated` ที่ได้คือ 49.9 ไม่ใช่ 50.0 ตามตัวอย่างในใบงาน — ไม่ใช่บั๊ก เป็นเพราะค่า default ของ `RawMin`/`RawMax` (150 กับ 3950) ไม่สมมาตรกัน จุดกึ่งกลางจริงของช่วงนี้คือ ADC = 2050 ไม่ใช่ 2048 พอคำนวณตามสูตรจริงๆ
 
-**ข้อสังเกตจาก Header**
+$$\frac{2048 - 150}{3950 - 150} \times 100 \approx 49.9$$
 
-| Header | ค่า | ความหมาย |
-| :--- | :--- | :--- |
-| `Server: Kestrel` | — | ยืนยันว่า Kestrel เป็นผู้ตอบเอง ไม่ได้ผ่าน IIS/Nginx reverse proxy |
-| `Content-Type` | `application/json; charset=utf-8` | `Results.Ok(object)` ทำ serialization ให้อัตโนมัติ |
-| `Transfer-Encoding: chunked` | — | เซิร์ฟเวอร์ไม่ทราบความยาว body ล่วงหน้า (เพราะ serialize แบบสตรีม) จึงส่งแบบแบ่งก้อนแทนการใส่ `Content-Length` |
-
----
-
-#### 2) POST /api/potentiometer/calibrate
+### POST /api/potentiometer/calibrate
 
 ```powershell
 Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method Post `
@@ -121,11 +83,7 @@ Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method
   -Body '{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}'
 ```
 
-**ภาพหน้าจอ Terminal จริง**
-
 ![POST calibrate](../Image/03-post-calibrate.png)
-
-**Response จริง (ถอดจากภาพ)**
 
 ```
 status  settings
@@ -133,22 +91,16 @@ status  settings
 success @{rawMin=200; rawMax=3800; scaleMin=0; scaleMax=1000; unit=RPM}
 ```
 
-> **หมายเหตุ:** เลือกใช้ `Invoke-RestMethod` แทน `curl.exe -d` เพราะ PowerShell รับสตริงที่มีเครื่องหมาย `{ }` และ `"` ในตัวแปรได้โดยตรง ไม่ผ่าน argument parser ของโปรแกรมภายนอก (native exe) จึงไม่เสี่ยงเจอปัญหา escape ตัวอักษรแบบที่ `curl.exe` เจอ
+ใช้ `Invoke-RestMethod` แทน `curl.exe -d` เพราะ PowerShell รับสตริงที่มี `{ }` และ `"` ได้ตรงๆ โดยไม่ผ่านการตัด argument แบบโปรแกรมภายนอก จึงไม่มีปัญหาเรื่อง escape ตัวอักษร
 
----
-
-#### 3) POST /api/oled/message
+### POST /api/oled/message
 
 ```powershell
 Invoke-RestMethod -Uri http://localhost:5117/api/oled/message -Method Post `
   -ContentType "application/json" -Body '{"message":"Hello OLED"}'
 ```
 
-**ภาพหน้าจอ Terminal จริง**
-
 ![POST oled message](../Image/04-post-oled-message.png)
-
-**Response จริง (ถอดจากภาพ)**
 
 ```
 status  current
@@ -156,7 +108,7 @@ status  current
 success Hello OLED
 ```
 
-**ตรวจสอบผลข้างเคียง** — เรียก `/api/telemetry` ซ้ำหลัง Calibrate + ส่งข้อความ
+เช็คผลข้างเคียงด้วยการเรียก telemetry ซ้ำ:
 
 ![Telemetry after calibrate](../Image/05-telemetry-after-calibrate-and-fault1-rawmax-lt-rawmin.png)
 
@@ -164,220 +116,116 @@ success Hello OLED
 {"raw":2048,"calibrated":513.3,"unit":"RPM","displayMsg":"Hello OLED","timestamp":"2026-09-15T03:29:02.1650456Z"}
 ```
 
-✅ ยืนยัน 3 อย่างพร้อมกัน: หน่วยเปลี่ยนเป็น RPM, ค่าคำนวณใหม่ตามสเกล 0–1000 และข้อความ OLED ถูกอัปเดตเป็น `Hello OLED` ตามคำสั่งล่าสุด (state ถูกเก็บไว้ใน Singleton `CalibrationService` และ persist ข้าม request จริง)
+หน่วยเปลี่ยนเป็น RPM ค่าคำนวณใหม่ตามสเกลที่ตั้งไว้ และข้อความ OLED อัปเดตถูกต้อง — แปลว่า state ที่เก็บใน `CalibrationService` ยังอยู่ข้าม request จริง (เพราะเป็น Singleton)
 
-ตรวจสอบเลขคณิต: $\frac{2048-200}{3800-200} \times 1000 = \frac{1848}{3600} \times 1000 = 513.33 \approx 513.3$ ✅
+ตรวจเลข: $\frac{2048-200}{3800-200} \times 1000 \approx 513.3$ ตรงกับที่ได้ ✅
 
-> **⚠️ บั๊กที่เคยเจอระหว่างพัฒนา (บันทึกไว้เป็นบทเรียน)**
-> ก่อนหน้านี้เคยลองยิงด้วย `curl.exe -d '{"message":"Hello OLED"}'` บน PowerShell แล้วได้ `400 Bad Request` พร้อม `JsonException: Expected end of string` และ Header แสดง `Content-Length: 17` ทั้งที่ JSON ควรยาว 24 ไบต์
->
-> **สาเหตุ:** PowerShell ตัด argument ที่ **ช่องว่าง** ใน `Hello OLED` ทำให้ `curl.exe` ได้รับ body แค่ `{"message":"Hello` — JSON จึงขาดกลางคัน **ไม่ใช่บั๊กของเซิร์ฟเวอร์** แต่เป็นปัญหาการ escape ของ Shell
-> **วิธีแก้ที่ใช้จริง:** เปลี่ยนไปใช้ `Invoke-RestMethod` ตามภาพด้านบน ซึ่งได้ `200 OK` ในครั้งแรกที่รันทันที
+> **บั๊กที่เจอตอนพัฒนา:** ตอนแรกลองยิงด้วย `curl.exe -d '{"message":"Hello OLED"}'` บน PowerShell แล้วได้ 400 พร้อม error ว่า JSON ขาดกลางคัน สาเหตุคือ PowerShell ตัดคำสั่งที่ช่องว่างในคำว่า "Hello OLED" ทำให้ `curl.exe` ได้รับ Body ไม่ครบ ไม่ใช่บั๊กของเซิร์ฟเวอร์ แก้โดยเปลี่ยนไปใช้ `Invoke-RestMethod` แทนตามภาพด้านบน
 
----
+### ทดสอบส่งข้อมูลผิดๆ (Fault Injection)
 
-### กิจกรรม 2.2 — Fault Injection & Vulnerability Probe
+| # | ทดสอบ | คาดว่าได้ | ผลจริง |
+| :---: | :--- | :---: | :--- |
+| 1 | `rawMin: 4000, rawMax: 1000` | 400 | 400 ✅ |
+| 2 | ข้อความว่าง | 400 | 400 ✅ |
+| 3 | POST ไม่ใส่ Content-Type | 415 | 415 ✅ |
+| 4 | URL ผิด | 404 | 404 ✅ |
 
-| # | การทดสอบ | คาดหวัง | **ผลจริง** | สถานะ |
-| :---: | :--- | :---: | :--- | :---: |
-| 1 | `rawMin: 4000, rawMax: 1000` | 400 | `400` + `{"status":"error","message":"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"}` | ✅ PASS |
-| 2 | `{"message":""}` | 400 | `400` + `{"status":"error","message":"ข้อความต้องไม่ว่างเปล่า"}` | ✅ PASS |
-| 3 | POST โดยไม่ใส่ `Content-Type` | 415 | `415 Unsupported Media Type` | ✅ PASS |
-| 4 | POST ไปที่ `/api/oled/` (ตกคำว่า message) | 404 | `404 Not Found` | ✅ PASS |
-
-#### หลักฐานภาพหน้าจอ Fault Injection ทั้ง 4 กรณี
-
-**Case 1 — `rawMin > rawMax` (ต่อจากภาพที่ 5 ด้านบน)**
-
-```powershell
-curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
-  -H "Content-Type: application/json" -d '{\"rawMin\":4000,\"rawMax\":1000,\"scaleMin\":0,\"scaleMax\":100,\"unit\":\"%\"}'
-```
-
+**Case 1:**
 ```http
 HTTP/1.1 400 Bad Request
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
-
 {"status":"error","message":"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"}
 ```
 
-**Case 2 — ข้อความว่างเปล่า**
+**Case 2:**
 
 ![Fault: empty message](../Image/06-fault2-empty-message.png)
 
 ```http
 HTTP/1.1 400 Bad Request
-Content-Type: application/json; charset=utf-8
-Server: Kestrel
-
 {"status":"error","message":"ข้อความต้องไม่ว่างเปล่า"}
 ```
 
-**Case 3 — ไม่ใส่ `Content-Type`**
+**Case 3:**
 
 ![Fault: no Content-Type](../Image/07-fault3-no-content-type.png)
 
 ```http
 HTTP/1.1 415 Unsupported Media Type
-Content-Length: 0
-Server: Kestrel
 ```
 
-**Case 4 — URL ผิด (`/api/oled/` ตกคำว่า `message`)**
+**Case 4:**
 
 ![Fault: bad URL](../Image/08-fault4-bad-url-404.png)
 
 ```http
 HTTP/1.1 404 Not Found
-Content-Length: 0
-Server: Kestrel
 ```
 
-**ข้อพิสูจน์สำคัญที่สุด:** หลังฉีดความผิดพร่องครบทั้ง 4 แบบ **เซิร์ฟเวอร์ Kestrel ยังทำงานต่อได้ปกติ ไม่ล่ม (No Server Crash)** เห็นได้จากภาพที่ 5 ที่เรียก `/api/telemetry` สำเร็จ (`200 OK`) ต่อเนื่องกับการยิง Fault Case ที่ 1 ในรันเดียวกัน โดยไม่ต้อง restart เซิร์ฟเวอร์
-
-สาเหตุที่ไม่ล่มคือ `ArgumentException` ถูกดักด้วย `try-catch` ในตัว Endpoint แล้วแปลงเป็น HTTP 400 อย่างสุภาพ ไม่ปล่อยให้ exception ทะลุขึ้นไปถึง Middleware Pipeline
+ที่สำคัญคือหลังยิง fault ทั้ง 4 แบบ เซิร์ฟเวอร์ยังทำงานปกติ ไม่ล่ม เพราะ `ArgumentException` ถูกดักด้วย try-catch ในตัว endpoint แล้วแปลงเป็น 400 อย่างสุภาพ ไม่ปล่อยให้หลุดขึ้นไปพัง middleware
 
 ---
 
-## 4. คำตอบคำถามท้ายการทดลอง
+## ตอบคำถามท้ายบท
 
-### ข้อ 1. ทำไมควรคำนวณสเกลเซนเซอร์ที่ฝั่ง Kestrel Server แทนที่จะคำนวณบน ESP32?
+**1. ทำไมควรคำนวณสเกลที่ฝั่ง Kestrel แทนที่จะคำนวณบน ESP32?**
 
-มี 5 เหตุผลหลัก
+หลักๆ มีเหตุผลอยู่ 5 ข้อ:
 
-**1. เปลี่ยนค่าปรับเทียบได้ทันทีโดยไม่ต้อง Re-flash**
-ถ้าฝัง `RawMin`/`RawMax` ไว้ในเฟิร์มแวร์ ทุกครั้งที่เปลี่ยน Potentiometer หรือค่าเลื่อนตามอุณหภูมิ ต้องคอมไพล์และแฟลชใหม่ทั้งบอร์ด — ในโรงงานที่มีอุปกรณ์ 500 ตัวคือฝันร้าย แต่ถ้าคำนวณบนเซิร์ฟเวอร์ แค่ยิง `POST /api/potentiometer/calibrate` ก็เปลี่ยนได้ทันที **ขณะระบบยังทำงานอยู่**
+- **เปลี่ยนค่าปรับเทียบได้ทันทีโดยไม่ต้อง flash ใหม่** — ถ้าฝังค่าไว้ในเฟิร์มแวร์ ทุกครั้งที่ต้อง calibrate ใหม่ต้อง compile+flash ทั้งบอร์ด แต่ถ้าคำนวณบนเซิร์ฟเวอร์ แค่ยิง API ก็เปลี่ยนได้เลยขณะระบบยังทำงานอยู่
+- **เก็บค่าดิบไว้เป็นหลักฐาน** — ESP32 ส่งค่า ADC ดิบที่ยังไม่ผ่านการตีความ ถ้าพบว่าตั้งค่าปรับเทียบผิดทีหลัง ยังย้อนกลับไปคำนวณใหม่จากข้อมูลเก่าได้ ถ้า ESP32 แปลงเป็นเปอร์เซ็นต์มาให้เลย ข้อมูลดิบจะหายไปเลย
+- **ประหยัดทรัพยากร ESP32** — ตัวไมโครคอนโทรลเลอร์ต้องทำงานหลายอย่างพร้อมกันอยู่แล้ว (อ่าน ADC, ยิง SPI, จัดการ Wi-Fi) เลขทศนิยมคำนวณบนชิปที่ไม่มี FPU แรงๆ เป็นภาระที่ไม่จำเป็น
+- **มี Source of Truth เดียว** — ถ้ามี ESP32 หลายตัว ตรรกะแปลงค่าจะอยู่ที่เดียวบนเซิร์ฟเวอร์ ทุกตัวใช้มาตรฐานเดียวกันแน่นอน
+- **แยกหน้าที่กันชัดเจน** — ESP32 มีหน้าที่วัดและรายงาน ส่วน Kestrel มีหน้าที่ตีความ ถ้า business logic เปลี่ยน (เช่นเปลี่ยนหน่วยจาก % เป็น RPM) ฝั่งฮาร์ดแวร์ไม่ต้องแก้อะไรเลย
 
-**2. เก็บ Raw Data ไว้เป็นหลักฐานดิบ (Data Provenance)**
-ESP32 ส่ง `ADC:2048` ซึ่งเป็น **ค่าดิบที่ไม่ผ่านการตีความ** ถ้าภายหลังพบว่าตั้งค่าปรับเทียบผิด ยังย้อนกลับไปคำนวณใหม่จากข้อมูลเก่าได้ แต่ถ้า ESP32 แปลงเป็น `50%` มาแล้ว ข้อมูลดิบจะสูญหายถาวรและกู้คืนไม่ได้
+**2. ถ้าไม่เช็ค `RawMax <= RawMin` จะเกิด Exception อะไรใน C#?**
 
-**3. ประหยัดทรัพยากรของไมโครคอนโทรลเลอร์**
-ESP32 ต้องทำงานเรียลไทม์หลายอย่างพร้อมกัน (สแกน ADC 20 Hz, ยิง SPI 1KB ต่อเฟรม, จัดการ FreeRTOS, Wi-Fi Stack) การคำนวณเลขทศนิยม `double` บนชิปที่ไม่มี FPU ประสิทธิภาพสูงเป็นภาระที่ไม่จำเป็น ขณะที่ฝั่งเซิร์ฟเวอร์คำนวณให้ได้ในระดับนาโนวินาที
+คนส่วนใหญ่มักตอบว่า `DivideByZeroException` แต่คำตอบนี้ผิด — ที่จริงแล้ว **ไม่เกิด Exception เลย** ซึ่งอันตรายกว่ามาก
 
-**4. Single Source of Truth**
-เมื่อมี ESP32 หลายตัวในระบบ ตรรกะการแปลงค่าอยู่ที่เดียวบนเซิร์ฟเวอร์ ทำให้ทุกอุปกรณ์ใช้มาตรฐานเดียวกันแน่นอน ไม่ต้องกังวลว่าบอร์ดตัวไหนแฟลชเวอร์ชันเก่าค้างอยู่
+เหตุผลคือ C# แยกกฎการหารตามชนิดข้อมูล: `int / 0` จะ throw แต่ `double / 0` จะไม่ throw กลับได้เป็น `Infinity` หรือ `NaN` แทนตามมาตรฐาน IEEE 754 ในโค้ดนี้ตัวเลขถูกแคสต์เป็น `double` ไว้แล้ว การหารจึงเป็นแบบทศนิยม
 
-**5. แยกหน้าที่ตามหลัก Separation of Concerns**
-ESP32 = ชั้นรับรู้ (Sensing Layer) ทำหน้าที่วัดและรายงานตามจริง / Kestrel = ชั้นตีความ (Business Logic Layer) ทำหน้าที่แปลงความหมาย เมื่อ Business Logic เปลี่ยน (เช่น เปลี่ยนจาก % เป็น RPM) ชั้นฮาร์ดแวร์ไม่ต้องแก้เลย
-
----
-
-### ข้อ 2. ถ้าไม่ตรวจสอบ `RawMax <= RawMin` จะเกิด Exception ชนิดใดใน C# และส่งผลอย่างไร?
-
-**คำตอบที่คนส่วนใหญ่ตอบผิด:** หลายคนตอบว่า `DivideByZeroException` — **ซึ่งไม่ถูกต้องในกรณีนี้**
-
-**คำตอบที่ถูกต้อง: ไม่เกิด Exception ใด ๆ เลย ซึ่งอันตรายกว่ามาก**
-
-เหตุผลอยู่ที่การแบ่งแยกกฎการหารใน C#
-
-| ชนิดข้อมูล | `x / 0` | ผลลัพธ์ |
-| :--- | :--- | :--- |
-| จำนวนเต็ม (`int`) | throw | `DivideByZeroException` |
-| **ทศนิยม (`double`)** | **ไม่ throw** | `Infinity`, `-Infinity` หรือ `NaN` ตามมาตรฐาน **IEEE 754** |
-
-ในโค้ดนี้ตัวตั้งถูกแคสต์เป็น `double` ไว้แล้ว (`(double)(clamped - RawMin)`) การหารจึงเป็นการหารแบบทศนิยม
-
-**วิเคราะห์ผลลัพธ์แยกเป็น 2 กรณี**
-
-**กรณี A: `RawMax == RawMin` (เช่น 2000 กับ 2000)**
-`Math.Clamp(raw, 2000, 2000)` บังคับให้ `clamped = 2000` เสมอ ตัวเศษจึงเป็น `0` และตัวส่วนก็เป็น `0`
-$\Rightarrow$ `0.0 / 0.0 = NaN` (Not a Number) โดย **ไม่มี Exception ใด ๆ แจ้งเตือน**
-
-*ยืนยันด้วยการทดลองจริงบน .NET 10:*
+ถ้า `RawMax == RawMin` พอดี (เช่น 2000 ทั้งคู่) `Math.Clamp` จะบังคับให้ค่าที่คำนวณเป็น `0/0 = NaN` โดยไม่มีการแจ้งเตือนใดๆ — ทดลองจริงบน .NET 10 ยืนยันแบบนี้:
 
 ```
 clamped=2000  value=NaN  IsNaN=True
-Math.Round(NaN,1) = NaN
 serialize THREW: ArgumentException: .NET number values such as positive and
 negative infinity cannot be written as valid JSON.
 ```
 
-**กรณี B: `RawMax < RawMin` (เช่น RawMin = 4000, RawMax = 1000)**
-`Math.Clamp` ในกรณีนี้จะ throw `ArgumentException` เพราะ .NET ตรวจพบว่า `min > max` (ทดสอบยืนยันแล้ว) — ถือว่าโชคดีที่มีกันชนชั้นนี้ แต่ข้อความ error จะสื่อสารไม่ตรงประเด็น (พูดถึง Clamp ไม่ได้พูดถึงการตั้งค่าปรับเทียบ) ทำให้ผู้ใช้ API งงและดีบักยาก
+ปัญหาคือ `NaN` จะไหลต่อไปเรื่อยๆ แบบเงียบๆ จนไปพังตอน serialize เป็น JSON (เพราะ JSON ไม่รองรับ NaN/Infinity) กลายเป็น 500 error ที่หาสาเหตุยาก เพราะจุดที่เกิดปัญหาจริง (การหาร) กับจุดที่ error โผล่ (serialize) อยู่คนละที่กัน — บทเรียนคือควรเช็ค input ตั้งแต่ต้นทาง (Fail Fast) ดีกว่าปล่อยให้ค่าเสียหายไหลลึกเข้าไปในระบบ
 
-**ผลกระทบต่อระบบโดยรวม (ทำไมถึงร้ายแรง)**
+(ส่วน `RawMax < RawMin` เช่น 4000 กับ 1000 จริงๆ แล้ว `Math.Clamp` จะ throw `ArgumentException` เองเพราะ .NET เช็คว่า min>max ให้อยู่แล้ว แต่ error message จะไม่ตรงประเด็นนักเพราะพูดถึง Clamp ไม่ได้พูดถึงการตั้งค่าปรับเทียบ)
 
-1. **ค่า `NaN` แพร่กระจายแบบเงียบ (Silent Propagation)** — ทุกการคำนวณที่นำ `NaN` ไปใช้ต่อจะได้ `NaN` หมด รวมถึง `Math.Round(NaN, 1)` ก็ยังเป็น `NaN`
-2. **JSON serialization ผิดมาตรฐาน** — `NaN` และ `Infinity` ไม่ใช่ค่าที่ JSON spec รองรับ `System.Text.Json` จะ throw **`ArgumentException`** ตอน serialize ด้วยข้อความ *".NET number values such as positive and negative infinity cannot be written as valid JSON"* ทำให้ **HTTP Response พังกลางคัน** ผู้ใช้ได้ 500 Internal Server Error ที่หาสาเหตุไม่เจอ
-3. **หน้าเว็บ Dashboard พัง** — JavaScript ได้ `null` หรือ `NaN` ไปวาดเข็มเกจ SVG ทำให้เข็มหายไปหรือชี้ไปนอกจอ
-4. **ดีบักยากที่สุด** — ไม่มี stack trace ชี้จุดเกิดเหตุ เพราะจุดที่เกิด `NaN` (การหาร) กับจุดที่ระบบพัง (การ serialize) อยู่คนละที่กัน
+**3. ทำไม POST ที่ไม่มี `Content-Type: application/json` ถึงถูกปฏิเสธด้วย 415?**
 
-**บทสรุปเชิงวิศวกรรม:** นี่คือตัวอย่างคลาสสิกของหลัก **"Fail Fast"** — การ `throw ArgumentException` พร้อมข้อความชัดเจนตั้งแต่ตอนรับ input ดีกว่าปล่อยให้ค่าเสียหายไหลลึกเข้าไปในระบบแล้วไปพังในจุดที่ไม่เกี่ยวข้องกัน
+เพราะเซิร์ฟเวอร์ไม่เดารูปแบบข้อมูลเอง — Body ของ HTTP Request เป็นแค่ไบต์ดิบๆ ที่ไม่มีความหมายในตัวเอง อาจเป็น JSON, XML, หรือไฟล์ภาพก็ได้ Header `Content-Type` ทำหน้าที่บอกว่า Body นี้คือรูปแบบอะไร
 
----
+พอ Kestrel เจอ endpoint ที่ต้องอ่าน Body เป็น JSON แต่ไม่มี Content-Type บอก ระบบก็เลือก Input Formatter ไม่ถูกเลยตอบ 415 ทันทีโดยยังไม่แตะ Body เลยด้วยซ้ำ
 
-### ข้อ 3. ทำไม POST ที่ไม่มี Header `Content-Type: application/json` ถูกปฏิเสธด้วย `415 Unsupported Media Type`?
+ความต่างระหว่าง 415 กับ 400: 415 คือ "ยังไม่รู้จะอ่านยังไง" ส่วน 400 คือ "อ่านแล้วแต่ข้างในผิดรูปแบบ" — จากการทดสอบข้างต้น Case 3 (ไม่ใส่ Content-Type) ได้ 415 ส่วนตอนที่ใส่ Content-Type ครบแต่ JSON ขาดหาย (บั๊ก PowerShell) ได้ 400 ตรงกับพฤติกรรมที่ควรจะเป็น
 
-**หลักการ: เซิร์ฟเวอร์ไม่ "เดา" รูปแบบข้อมูล**
-
-เมื่อ HTTP Request มาถึง Kestrel ตัว Body เป็นเพียง **สายไบต์ดิบ (Raw Byte Stream)** ที่ไม่มีความหมายในตัวเอง ไบต์ชุดเดียวกันอาจเป็น JSON, XML, `application/x-www-form-urlencoded`, Protocol Buffers หรือไฟล์ภาพก็ได้
-
-Header `Content-Type` จึงทำหน้าที่เป็น **"ฉลากกำกับสินค้า"** ตามที่ RFC 9110 กำหนด ให้ผู้ส่งประกาศว่า Body ที่ส่งมาคือรูปแบบใด
-
-**กลไกภายใน ASP.NET Core ทีละขั้น**
-
-1. Routing จับคู่ URL และ HTTP Method ได้สำเร็จ → พบ Endpoint `/api/oled/message`
-2. RequestDelegateFactory ตรวจ Signature พบพารามิเตอร์ `DisplayMessageRequest req` เป็น Complex Type ที่ไม่ได้ลงทะเบียนใน DI → สรุปว่าต้องอ่านจาก Body
-3. ระบบเลือก **Input Formatter** โดยดูจาก `Content-Type` — ค่าเริ่มต้นมีเพียง `SystemTextJsonInputFormatter` ที่รองรับ `application/json` เท่านั้น
-4. **ไม่มี Content-Type → ไม่รู้จะเลือก Formatter ตัวใด → ตอบ `415` ทันที** โดยยังไม่แตะ Body แม้แต่ไบต์เดียว
-
-**ทำไมต้องเป็น 415 ไม่ใช่ 400?** เพราะรหัสสถานะทั้งสองสื่อสารคนละเรื่อง ซึ่งช่วยให้ debug ได้ตรงจุด
-
-| รหัส | ความหมาย | สถานการณ์ |
-| :---: | :--- | :--- |
-| **415** Unsupported Media Type | *"ผมไม่รู้ว่าข้อมูลนี้เป็นรูปแบบอะไร จึงยังไม่ได้เปิดอ่าน"* | ขาด Content-Type หรือส่งเป็น `text/plain` |
-| **400** Bad Request | *"ผมเปิดอ่านแล้ว แต่เนื้อหาข้างในผิดรูปแบบ"* | ส่ง JSON มาแต่วงเล็บไม่ปิด (เช่น บั๊ก PowerShell ข้างต้น) |
-
-**หลักฐานเชิงประจักษ์จากการทดลอง** — Fault Case ที่ 3 ได้ `415` เพราะไม่ใส่ Header
-ขณะที่บั๊ก PowerShell ตัดสตริงกลางคัน (ซึ่ง**ใส่** Header ครบ) ได้ `400` พร้อม `JsonException`
-ยืนยันว่าเซิร์ฟเวอร์แยกแยะสองสถานการณ์นี้ออกจากกันได้จริง
-
-**เหตุผลด้านความปลอดภัย:** การบังคับให้ประกาศ Content-Type ยังช่วยป้องกัน **CSRF (Cross-Site Request Forgery)** ระดับหนึ่ง เพราะฟอร์ม HTML ธรรมดาส่งได้เฉพาะ `application/x-www-form-urlencoded`, `multipart/form-data` และ `text/plain` เท่านั้น ส่งเป็น `application/json` ไม่ได้ เว็บที่เป็นอันตรายจึงไม่สามารถหลอกให้เบราว์เซอร์ยิง JSON API ข้ามโดเมนได้โดยไม่ผ่านการตรวจ CORS Preflight ก่อน
+การบังคับให้ประกาศ Content-Type ยังช่วยกัน CSRF ระดับหนึ่งด้วย เพราะฟอร์ม HTML ธรรมดาส่งเป็น `application/json` ไม่ได้ เว็บอันตรายจึงหลอกเบราว์เซอร์ยิง JSON API ข้ามโดเมนแบบง่ายๆ ไม่ได้
 
 ---
 
-## 5. วิธีรันและทดสอบโค้ดที่ส่ง
-
-### รันเซิร์ฟเวอร์
+## วิธีรัน
 
 ```bash
 cd Code/Lab9-2_Kestrel_Webserver/ESP32.Kestrel.Webserver
 dotnet run
 ```
 
-เซิร์ฟเวอร์จะฟังที่ `http://localhost:5117` (กำหนดไว้ใน `Properties/launchSettings.json`)
-
-### ชุดคำสั่งทดสอบครบทุกกรณี (เปิด Terminal หน้าต่างที่ 2)
+เปิด Terminal อีกหน้าต่างมาทดสอบ:
 
 ```powershell
-# 1. GET telemetry
 curl.exe -i http://localhost:5117/api/telemetry
 
-# 2. Calibrate (สำเร็จ)
 Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method Post `
   -ContentType "application/json" `
   -Body '{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}'
 
-# 3. ส่งข้อความขึ้นจอ OLED
 Invoke-RestMethod -Uri http://localhost:5117/api/oled/message -Method Post `
   -ContentType "application/json" -Body '{"message":"Hello OLED"}'
-
-# 4. Fault: RawMax < RawMin  -> ต้องได้ 400
-curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
-  -H "Content-Type: application/json" `
-  -d '{\"rawMin\":4000,\"rawMax\":1000,\"scaleMin\":0,\"scaleMax\":100,\"unit\":\"%\"}'
-
-# 5. Fault: ข้อความว่าง  -> ต้องได้ 400
-curl.exe -i -X POST http://localhost:5117/api/oled/message `
-  -H "Content-Type: application/json" -d '{\"message\":\"\"}'
-
-# 6. Fault: ไม่มี Content-Type  -> ต้องได้ 415
-curl.exe -i -X POST http://localhost:5117/api/oled/message -d '{\"message\":\"x\"}'
-
-# 7. Fault: URL ผิด  -> ต้องได้ 404
-curl.exe -i -X POST http://localhost:5117/api/oled/
 ```
 
-> **เคล็ดลับจากที่เจอมาจริง:** ถ้า JSON มี **ช่องว่าง** ให้ใช้ `Invoke-RestMethod` หรือ `--data-binary "@file.json"`
-> อย่าใช้ `curl.exe -d` กับ single-quote บน PowerShell เพราะสตริงจะถูกตัดที่ช่องว่าง
+> ถ้า JSON มีช่องว่างในข้อความ ใช้ `Invoke-RestMethod` แทน `curl.exe -d` เสมอ — บน PowerShell `curl.exe -d` กับ single-quote จะโดนตัดที่ช่องว่าง
