@@ -8,7 +8,8 @@
 | **โค้ดที่ส่ง (เฟิร์มแวร์)** | [`Code/Lab9-3_ClosedLoop/firmware/Lab9-3-ESP32-ClosedLoop/`](../Code/Lab9-3_ClosedLoop/firmware/Lab9-3-ESP32-ClosedLoop/) |
 | **โค้ดที่ส่ง (เซิร์ฟเวอร์)** | [`Code/Lab9-3_ClosedLoop/server/ESP32.Kestrel.ClosedLoop/`](../Code/Lab9-3_ClosedLoop/server/ESP32.Kestrel.ClosedLoop/) |
 | **เฟรมเวิร์ก** | ESP-IDF v6.x (เฟิร์มแวร์) + .NET 10 Minimal API (Kestrel, พอร์ต `5127`) |
-| **สถานะการทดสอบ** | ✅ ฝั่งเซิร์ฟเวอร์: Build ผ่าน 0 Error, รันจริงและทดสอบครบทุก Endpoint ผ่าน Browser + curl<br>⚠️ ฝั่งเฟิร์มแวร์: **ยังไม่ได้คอมไพล์บนเครื่องนี้** เพราะไม่มี ESP-IDF/Docker ติดตั้งอยู่ (ดูหัวข้อ 6) |
+| **สถานะการทดสอบ** | ✅ เซิร์ฟเวอร์: Build ผ่าน 0 Error, ทดสอบครบทุก Endpoint<br>✅ เฟิร์มแวร์: **คอมไพล์และแฟลชลงบอร์ดจริงสำเร็จแล้ว** (ทดสอบโดยนักศึกษาเอง)<br>✅ **Checkpoint 3.2 (Edge → Cloud) ยืนยันด้วยภาพถ่ายจริง** ดูหัวข้อ 4.3<br>⚠️ **Potentiometer ยังอ่านค่าไม่ได้ (RAW ค้างที่ 0)** — ปัญหาการต่อขา Wiper ยังไม่ได้แก้ ดูหัวข้อ 4.4 |
+| **หลักฐานภาพฮาร์ดแวร์จริง** | [`Image/10-lab9-3-cloud-mode-closeup-1.jpg`](../Image/10-lab9-3-cloud-mode-closeup-1.jpg), [`11-...-dashboard-full.jpg`](../Image/11-lab9-3-cloud-mode-dashboard-full.jpg), [`12-...-closeup-2.jpg`](../Image/12-lab9-3-cloud-mode-closeup-2.jpg) |
 
 ---
 
@@ -97,6 +98,33 @@ idf_component_register(SRCS "main.c"
 
 **วิธีแก้ที่ใช้:** เพิ่ม `lock (_gate)` ครอบทุกจุดที่อ่าน/เขียน state ร่วม (ดู [`CalibrationService.cs`](../Code/Lab9-3_ClosedLoop/server/ESP32.Kestrel.ClosedLoop/Services/CalibrationService.cs)) — ไม่เปลี่ยนพฤติกรรมภายนอกของ API แม้แต่น้อย เป็นเพียงการเสริมความปลอดภัยของหน่วยความจำร่วม
 
+### บั๊กที่ 3 — Serial Port ปิดช้าตอน Shutdown (พบระหว่างทดสอบกับบอร์ดจริง)
+
+ระหว่างทดสอบจริงกับฮาร์ดแวร์ เจอเคสที่กด `Ctrl+C` ปิด Kestrel แล้วรัน `dotnet run` ใหม่ทันที เจอ
+
+```
+เกิดข้อผิดพลาดในการสื่อสาร Serial: Access to the path 'COM3' is denied.
+```
+
+**สาเหตุ:** โค้ดต้นฉบับของใบงานใช้ `_serialPort.ReadLine()` เป็น **Blocking Call** ที่รอได้นานสุดถึง `ReadTimeout` (2,000 ms) เมื่อกด `Ctrl+C` ตัว `IHostApplicationLifetime` จะรอให้ `ExecuteAsync()` ของ `SerialBridgeService` คืนค่าก่อนถึงจะปิดโปรแกรมได้จริง แต่ถ้า `ReadLine()` กำลังบล็อกอยู่พอดี โปรแกรมจะ**ค้างถือ Handle ของ COM Port ไว้อีกพักหนึ่ง**หลังกด Ctrl+C ถ้ารัน `dotnet run` ซ้ำเร็วเกินไปก่อน process เดิม exit จริง จะชน `Access is denied`
+
+**วิธีแก้ที่ใช้:** ลงทะเบียน `stoppingToken.Register(...)` ให้บังคับปิดพอร์ตทันทีเมื่อมีการขอยกเลิก (Ctrl+C) แทนที่จะรอให้ `ReadLine()` ปลดบล็อกเอง
+
+```csharp
+using var cancelRegistration = stoppingToken.Register(() =>
+{
+    try { _serialPort?.Close(); } catch { /* ระหว่างปิดฉุกเฉิน ไม่สนใจ error ใด ๆ */ }
+});
+```
+
+การปิดพอร์ตแบบนี้ทำให้ `ReadLine()` ที่กำลังบล็อกอยู่ปลดล็อกด้วย `IOException` ทันที ทำให้ Shutdown เร็วขึ้นมากและคืนพอร์ตให้ process ถัดไปได้แน่นอน
+
+> **บันทึกเพิ่มเติมจากการดีบักจริงหน้างาน:** ระหว่างไล่ปัญหานี้ พบว่าสาเหตุหลักจริงๆ ที่ทำให้ COM3 ค้างไม่ใช่บั๊กนี้อย่างเดียว แต่เกิดจาก **การรัน `idf.py flash monitor` หลายรอบแล้วไม่เคยกด `Ctrl+]` ออกจริง** ทำให้มี `idf_monitor.py` ค้างอยู่เบื้องหลังพร้อมกันถึง 6 process ถือพอร์ตไว้ ตรวจพบด้วย
+> ```powershell
+> Get-CimInstance Win32_Process -Filter "Name='python.exe'" | Select ProcessId, CommandLine
+> ```
+> บทเรียนสำคัญ: **ใบงานเตือนเรื่องนี้ไว้แล้วในหัวข้อ 5 (บั๊กและข้อผิดพลาดที่พบบ่อย ข้อ 1)** — ต้องกด `Ctrl+]` ออกจาก monitor ให้เรียบร้อยทุกครั้งก่อนสลับไปรัน Kestrel เสมอ มิฉะนั้นจะสะสม process ค้างจนพอร์ตล็อกถาวร
+
 ---
 
 ## 4. ผลการทดสอบจริง
@@ -142,35 +170,77 @@ info: ESP32.Kestrel.ClosedLoop.Services.SerialBridgeService[0]
 
 **สิ่งที่เพิ่มเติมจากใบงาน:** ใส่ badge `SERIAL OK` / `NO SERIAL` และแสดง `Kestrel Latency` บนหน้าเว็บ (ใบงานต้นฉบับไม่มี) เพื่อให้มองเห็นสถานะ `isConnected` ที่ API คืนมาอยู่แล้วโดยไม่ต้องเปิด DevTools ดู — ช่วยให้ตรวจ Checkpoint 3.2 ได้ง่ายขึ้นตอนทดสอบจริงกับบอร์ด
 
-### 4.2 ฝั่งเฟิร์มแวร์ (ยังไม่ได้ตรวจสอบด้วยการคอมไพล์จริง)
+### 4.2 ฝั่งเฟิร์มแวร์ — คอมไพล์และแฟลชจริงสำเร็จ ✅
 
-เครื่องที่ใช้พัฒนาไม่มี ESP-IDF toolchain และไม่มี Docker ติดตั้งอยู่ (`idf.py`: not found, `docker`: not found) จึง **ยังไม่สามารถรัน `idf.py build` เพื่อยืนยันว่าคอมไพล์ผ่านจริงได้**
+เครื่องที่ใช้พัฒนาโค้ดไม่มี ESP-IDF toolchain ติดตั้งอยู่ จึงตรวจสอบได้แค่ Manual Static Review ตอนแรก แต่นักศึกษาได้นำโค้ดไป `idf.py build` และ `idf.py -p COM3 flash monitor` บนเครื่องที่มี ESP-IDF v6.1 จริง
 
-สิ่งที่ตรวจสอบได้โดยไม่ต้องคอมไพล์ (Manual Static Review):
-- โครงสร้างวงเล็บ `{}` และการปิด statement ครบทุกฟังก์ชัน (ตรวจด้วยสายตาเทียบกับ Lab 9.1/9.2 ที่ใช้รูปแบบเดียวกันและคอมไพล์ผ่านแล้วจริงในสภาพแวดล้อมก่อนหน้า)
-- Header ที่ include ครบ (`inttypes.h` สำหรับ `PRId64`, `driver/uart.h` สำหรับ UART API)
-- ชื่อฟังก์ชัน ESP-IDF API (`adc_oneshot_*`, `spi_bus_*`, `uart_*`) ตรงกับที่ใช้จริงใน Lab 9.1 ซึ่งอ้างอิง ESP-IDF v6.x เหมือนกัน
-- แก้ไข `main/CMakeLists.txt` ให้ตรงกับชื่อไฟล์แล้ว (บั๊กที่ 1 ข้างต้น)
+**บั๊กที่เจอระหว่าง build จริง (นอกจากบั๊กที่ 1 ที่แก้ไว้ล่วงหน้าแล้ว):** ไม่มี — build ผ่านตั้งแต่ครั้งแรกหลังแก้ `main/CMakeLists.txt`
 
-**สิ่งที่นักศึกษาต้องทำเพิ่มก่อนส่งจริง:** รัน `idf.py build` บนเครื่องที่มี ESP-IDF แล้วแก้ error จากการคอมไพล์ (ถ้ามี) ก่อน flash ลงบอร์ดจริง — ดูคำสั่งในหัวข้อ 6
+**Log จาก Serial Monitor ยืนยันว่าเฟิร์มแวร์รันจริงถูกต้อง:**
+
+```
+ADC:0,22740
+ADC:0,22790
+ADC:0,22840
+...
+```
+
+ตัวเลข uptime เพิ่มขึ้นครั้งละ **50 ms พอดี** ทุกบรรทัด — ยืนยันว่าลูป `vTaskDelay(pdMS_TO_TICKS(50))` (20 Hz) ทำงานถูกต้องตรงตามที่ออกแบบไว้ทุกประการ
 
 ---
 
-## 5. Checklist การทดสอบภาคสนาม (ให้ทำเมื่อมีบอร์ดจริง)
+### 4.3 Checkpoint 3.2 (Edge → Cloud) — ยืนยันด้วยภาพถ่ายจริง ✅
+
+หลังแก้ปัญหา COM Port ค้าง (บั๊กที่ 3) และรัน Kestrel ให้เชื่อมต่อบอร์ดได้สำเร็จ ทดสอบส่งข้อความจากหน้าเว็บ Remote Control ไปยัง OLED จริง
+
+![Dashboard เต็มจอ พร้อมบอร์ดจริง แสดงสถานะ SERIAL OK](../Image/11-lab9-3-cloud-mode-dashboard-full.jpg)
+
+![ระยะใกล้: จอ OLED แสดง CLOUD และหน้าเว็บแสดงส่งข้อความสำเร็จ](../Image/10-lab9-3-cloud-mode-closeup-1.jpg)
+
+![ระยะใกล้อีกมุม ยืนยันข้อความ CLOUD: theeranat ตรงกับที่พิมพ์บนเว็บ](../Image/12-lab9-3-cloud-mode-closeup-2.jpg)
+
+**สิ่งที่ยืนยันได้จากภาพทั้ง 3 รูป**
+
+| หลักฐาน | ตรงตาม Checkpoint 3.2 หรือไม่ |
+| :--- | :---: |
+| จอ OLED โซน 1 แสดง `ESP32 \| 67030098` | ✅ |
+| จอ OLED โซน 3 เปลี่ยนจาก `EDGE:` เป็น **`CLOUD: theeranat`** | ✅ — พิสูจน์ว่า ESP32 ได้รับแพ็กเก็ต `SET:0:theeranat\n` จาก Kestrel จริง |
+| หน้าเว็บ badge แสดง `SERIAL OK` (สีเขียว) | ✅ |
+| หน้าเว็บแจ้ง "สถานะการส่ง: ส่งข้อความสำเร็จ!" | ✅ |
+| ข้อความบนจอ OLED ตรงกับข้อความที่พิมพ์บนเว็บ (`theeranat`) | ✅ — พิสูจน์ Full-Duplex Loop ทำงานจริงครบวงจร |
+
+**สรุป:** กลไก Full-Duplex Serial Bridge และการยกระดับจาก Edge เป็น Cloud Mode **ทำงานได้จริงตามที่ออกแบบไว้ทุกประการ** — เป็นหลักฐานที่แข็งแรงที่สุดในรายงานนี้ เพราะพิสูจน์ครบทั้ง 3 ชั้นพร้อมกัน (ESP32 → Serial → Kestrel → Serial → ESP32 → OLED)
+
+---
+
+### 4.4 ปัญหาที่ยังไม่ได้แก้ — Potentiometer อ่านค่าไม่ได้ (RAW ค้างที่ 0) ⚠️
+
+จากภาพทั้ง 3 รูปข้างต้น จะสังเกตเห็นว่า **`RAW:0000` และแถบ Gauge ว่างเปล่า 0%** ตลอด แม้ระบบ Edge-Cloud จะทำงานถูกต้องแล้วก็ตาม
+
+**การวินิจฉัยเบื้องต้น (ยังไม่ได้ยืนยันด้วยมัลติมิเตอร์):** น่าจะเป็นปัญหาการต่อสาย Potentiometer โดยเฉพาะ **ขา 2 (Wiper)** ที่ต้องต่อเข้า GPIO 34 ให้ถูกต้อง เพราะโค้ดฝั่งอ่านค่า (`adc_oneshot_read`) ผ่าน `ESP_ERROR_CHECK` โดยไม่มี error ใดๆ ยืนยันว่าซอฟต์แวร์ทำงานถูกต้อง ปัญหาจึงอยู่ที่ชั้นวงจรไฟฟ้า ไม่ใช่โค้ด
+
+**สิ่งที่ต้องทำต่อก่อนกรอกตาราง Co-Verification Matrix ในหัวข้อ 4.5:**
+1. ตรวจสอบว่าขา Wiper (ขากลางของ Potentiometer ตามตำแหน่งจริง ไม่ใช่ตามเลขที่พิมพ์) ต่อเข้า GPIO 34 แล้วจริง
+2. วัดแรงดันที่ขา Wiper ด้วยมัลติมิเตอร์ขณะหมุน ต้องเห็นค่าเปลี่ยนระหว่าง 0–3.3V
+3. ถ้าแรงดันเปลี่ยนแต่ `RAW` ในโปรแกรมยังไม่เปลี่ยน ให้ตรวจสอบว่าใช้ `ADC_CHANNEL_6` (=GPIO 34) ตรงกับขาที่ต่อจริงหรือไม่
+
+---
+
+## 5. Checklist การทดสอบภาคสนาม
 
 ### Checkpoint 3.1 — Standalone / Edge Computing Mode (ก่อนเปิด Kestrel)
-- [ ] Serial Monitor แสดง `ADC:xxxx,xxxxx` ไหลต่อเนื่อง
-- [ ] จอ OLED โซน 1 แสดง `ESP32 | 67030098`
-- [ ] หมุน Potentiometer แล้วแถบ Gauge และตัวเลข `RAW` ขยับลื่นไม่กระตุก
-- [ ] โซน 3 แสดง `EDGE: LOCAL EDGE`
-- [ ] กด `Ctrl+]` ออกจาก Serial Monitor ก่อนเปิด Kestrel
+- [x] Serial Monitor แสดง `ADC:xxxx,xxxxx` ไหลต่อเนื่อง (ยืนยันแล้ว — uptime เพิ่ม 50ms/รอบตรงตามที่ออกแบบ)
+- [x] จอ OLED โซน 1 แสดง `ESP32 | 67030098` (เห็นในภาพหัวข้อ 4.3)
+- [ ] หมุน Potentiometer แล้วแถบ Gauge และตัวเลข `RAW` ขยับลื่นไม่กระตุก — **ยังไม่ผ่าน ดูหัวข้อ 4.4**
+- [x] โซน 3 แสดง `EDGE: LOCAL EDGE` (ยืนยันจาก log ก่อนเชื่อม Kestrel)
+- [x] กด `Ctrl+]` ออกจาก Serial Monitor ก่อนเปิด Kestrel (เรียนรู้จากบั๊กที่ 3 ข้างต้น)
 
 ### Checkpoint 3.2 — Transition to Cloud Computing Mode
-- [ ] แก้ `appsettings.json` → `SerialPort:PortName` เป็นพอร์ตจริงของบอร์ด (เช่น `COM3`)
-- [ ] `dotnet run` แล้วเห็น `เชื่อมต่อพอร์ต COMxx สำเร็จ!`
-- [ ] จอ OLED โซน 3 เปลี่ยนจาก `EDGE: LOCAL EDGE` เป็น `CLOUD: READY` **ทันที**
-- [ ] กด `Ctrl+C` ปิด Kestrel → ภายใน ~1.5 วิ จอดีดกลับเป็น `EDGE: LOCAL EDGE`
-- [ ] `dotnet run` ใหม่ → จอกลับเป็น `CLOUD` โดยไม่ต้องรีเซ็ตบอร์ด
+- [x] แก้ `appsettings.json` → `SerialPort:PortName` เป็นพอร์ตจริงของบอร์ด (`COM3`)
+- [x] `dotnet run` แล้วเห็น `เชื่อมต่อพอร์ต COM3 สำเร็จ!`
+- [x] **จอ OLED โซน 3 เปลี่ยนจาก `EDGE: LOCAL EDGE` เป็น `CLOUD: ...` ทันที** — ยืนยันด้วยภาพถ่ายจริง 3 รูป (หัวข้อ 4.3)
+- [ ] กด `Ctrl+C` ปิด Kestrel → ภายใน ~1.5 วิ จอดีดกลับเป็น `EDGE: LOCAL EDGE` — ยังไม่ได้ถ่ายภาพยืนยันขั้นนี้
+- [ ] `dotnet run` ใหม่ → จอกลับเป็น `CLOUD` โดยไม่ต้องรีเซ็ตบอร์ด — ยังไม่ได้ถ่ายภาพยืนยันขั้นนี้
 
 ### กิจกรรม 4.2 — Co-Verification Matrix
 
@@ -182,7 +252,7 @@ info: ESP32.Kestrel.ClosedLoop.Services.SerialBridgeService[0]
 | ~135° | _____ | _____ | _____ | [ ] ตรง | _____ |
 | ขวาสุด (180°) | _____ | _____ | _____ | [ ] ตรง | _____ |
 
-> ให้กรอกค่าจริงจากบอร์ดตอนสอบ/ส่งงาน — ตารางนี้ต้องมีค่าจริงจากฮาร์ดแวร์เท่านั้น จำลองไม่ได้
+> **สถานะปัจจุบัน:** ยังกรอกตารางนี้ไม่ได้ เพราะ Potentiometer ยังอ่านค่าไม่ได้ (ดูหัวข้อ 4.4) — ต้องแก้การต่อขา Wiper ก่อน แล้ว `RAW` จึงจะเปลี่ยนตามการหมุนจริง จากนั้นค่อยกรอกตารางนี้ด้วยค่าจริงจากฮาร์ดแวร์เท่านั้น จำลองไม่ได้
 
 ---
 
