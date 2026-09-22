@@ -42,6 +42,18 @@ public class SerialBridgeService : BackgroundService
 
         _logger.LogInformation("กำลังเปิดการเชื่อมต่อ Serial Port: {Port} ที่ BaudRate {Baud}", portName, baudRate);
 
+        // แก้ไขบั๊กที่พบระหว่างทดสอบจริงกับบอร์ด: เดิม ReadLine() เป็น Blocking Call ที่รอ
+        // ได้นานถึง ReadTimeout (2 วิ) เมื่อกด Ctrl+C ตอนกำลังบล็อกอยู่ ตัว Host จะรอ ExecuteAsync
+        // คืนค่าจนกว่า ReadLine จะปลดบล็อกเอง ทำให้ dotnet.exe process ค้างถือ handle ของ COM Port
+        // อยู่อีกพักหนึ่งหลังกด Ctrl+C ถ้ารัน `dotnet run` ซ้ำเร็วเกินไปจะชน
+        // "Access to the path 'COMx' is denied" เพราะ process เก่ายังไม่ทันปล่อยพอร์ตคืน
+        // วิธีแก้: บังคับปิดพอร์ตทันทีที่มีการขอยกเลิก (Ctrl+C) เพื่อให้ ReadLine() ปลดบล็อกด้วย
+        // IOException ทันทีแทนที่จะรอจน Timeout ครบ ทำให้ Shutdown เร็วและคืนพอร์ตได้แน่นอน
+        using var cancelRegistration = stoppingToken.Register(() =>
+        {
+            try { _serialPort?.Close(); } catch { /* ระหว่างปิดฉุกเฉิน ไม่สนใจ error ใด ๆ */ }
+        });
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -106,5 +118,6 @@ public class SerialBridgeService : BackgroundService
         }
 
         if (_serialPort?.IsOpen == true) _serialPort.Close();
+        _serialPort?.Dispose();
     }
 }
