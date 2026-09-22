@@ -1,0 +1,6 @@
+-Wno-frame-address
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
+"-specs=C:/Users/HP OMEN/Desktop/work-gitfork-kmitl/Week-09-SPI-OLED-and-Kestrel-UI/043-Week-09-SPI-OLED-and-Kestrel-UI/Lab9-3-ESP32-ClosedLoop/build/specs/picolibc.specs"

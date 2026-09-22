@@ -1,7 +1,9 @@
+namespace ESP32.Kestrel.Webserver.Services;
+
 public class CalibrationSettings
 {
-    public int RawMin { get; set; } = 150;     // ค่าดิบต่ำสุด (Zero Point)
-    public int RawMax { get; set; } = 3950;    // ค่าดิบสูงสุด (Span Point)
+    public int RawMin { get; set; } = 88;     // ค่าดิบต่ำสุด (Zero Point)
+    public int RawMax { get; set; } = 2600;    // ค่าดิบสูงสุด (Span Point)
     public double ScaleMin { get; set; } = 0.0;
     public double ScaleMax { get; set; } = 100.0;
     public string Unit { get; set; } = "%";
@@ -34,7 +36,7 @@ public class CalibrationService
     {
         // Clamp ค่าให้อยู่ในช่วงที่กำหนด ป้องกันสเกลทะลัก
         int clamped = Math.Clamp(rawAdc, _settings.RawMin, _settings.RawMax);
-        return ((double)(clamped - _settings.RawMin) / (_settings.RawMax - _settings.RawMin)) 
+        return ((double)(clamped - _settings.RawMin) / (_settings.RawMax - _settings.RawMin))
                * (_settings.ScaleMax - _settings.ScaleMin) + _settings.ScaleMin;
     }
 }
