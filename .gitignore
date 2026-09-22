@@ -19,3 +19,15 @@ CMakeUserPresets.json
 /Lab9_Codes/ESP32.Kestrel.Webserver/obj
 /Lab9_Codes/Lab9-3-ESP32-ClosedLoop/build
 *.zip
+
+# General Build and IDE folders
+**/build/
+**/bin/
+**/obj/
+.vs/
+*.log
+
+# Root test/duplicate folders
+/ESP32.Kestrel.Webserver/
+/Lab9-1_OLED_BringUp/
+
