@@ -189,7 +189,7 @@ void render_multizone_ui(int raw_val, int percent, bool is_cloud, const char *ms
     // --- Zone 1: Status Bar (Header: Y=0..12) ---
     // นักศึกษาต้องใส่รหัสนักศึกษาของตนเองลงในสตริงนี้
     char header_str[32];
-    snprintf(header_str, sizeof(header_str), "ESP32 | 65012345"); // <-- แก้ไขเป็นรหัสนักศึกษาจริง
+    snprintf(header_str, sizeof(header_str), "ESP32 | 67030351"); // <-- แก้ไขเป็นรหัสนักศึกษาจริง
     oled_draw_string(2, 2, header_str, true);
     oled_draw_line_h(0, 13, 128, true); // เส้นกั้นโซน 1
 

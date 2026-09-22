@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/GitHubRepos/__ENGEDU/__Iot_App_2569/Week-09-SPI-OLED-and-Kestrel-UI/Lab9_Codes/Lab9-3-ESP32-ClosedLoop"
+    "idf.currentSetup": "/Users/petchauisui/.espressif/v6.0.2/esp-idf",
+    "cmake.sourceDirectory": "/Users/petchauisui/Desktop/Dev/Week-09-SPI-OLED-and-Kestrel-UI/67030351/Lab9-1_OLED_BringUp"
 }
