@@ -292,6 +292,7 @@ Server: Kestrel
 
 {"raw":2048,"calibrated":50.0,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-13T..."}
 ```
+<img width="1855" height="1138" alt="image" src="https://github.com/user-attachments/assets/6ad72b2f-3996-434e-9567-5c5c89144531" />
 
 ---
 
@@ -318,6 +319,7 @@ Server: Kestrel
 
 {"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
 ```
+<img width="1855" height="1138" alt="image" src="https://github.com/user-attachments/assets/ccb8320b-774f-4e95-9b40-931fa8162e6b" />
 
 ---
 
@@ -343,6 +345,7 @@ Server: Kestrel
 
 {"status":"success","current":"Hello OLED"}
 ```
+<img width="1053" height="436" alt="image" src="https://github.com/user-attachments/assets/ead5a771-c2a0-4ed1-8ff2-7ae38f2f689c" />
 
 ---
 

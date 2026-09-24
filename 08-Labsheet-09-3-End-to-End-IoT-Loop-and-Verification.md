@@ -475,6 +475,10 @@ idf.py -p COMxx flash monitor
 ```powershell
 docker run --rm -w /workspace/ --mount "type=bind,source=$((Get-Location).Path),target=/workspace" espressif/idf:release-v6.1 idf.py build
 ```
+# วิดีโอการทดลอง
+https://youtube.com/shorts/SC_Brkl3u4k?feature=share
+---
+
 
 ```powershell
 # ตรวจสอบให้แน่ใจว่าอยู่ที่ root ของ project แล้ว 
@@ -743,7 +747,8 @@ app.Run();
 ```powershell
 dotnet run
 ```
-
+# วิดีโอการทดลอง
+https://youtube.com/shorts/s_0QQZiUs3w?feature=share
 ---
 
 #### จุดตรวจสอบที่ 2 (Checkpoint 3.2 Transition to Cloud Computing Mode)
@@ -875,7 +880,8 @@ dotnet run
 1. **ทดสอบพิมพ์ข้อความในช่อง Remote Control บนเว็บ**
    - พิมพ์ข้อความภาษาอังกฤษ เช่น `"TEST OK"` หรือ `"IoT ALERT"` แล้วกดปุ่ม **ส่งข้อความ**
    - สังเกตที่ **Zone 3 ของหน้าจอ OLED จริง** ข้อความจะต้องเปลี่ยนเป็นคำที่พิมพ์จากหน้าเว็บทันที
-
+# วิดีโอการทดลอง
+https://youtube.com/shorts/bAteepXMJ_0?feature=share
 ---
 
 ## 4. การตรวจวัดความหน่วงเวลาและการพิสูจน์หลักฐาน (End-to-End Latency Forensics)
@@ -912,12 +918,12 @@ Measure-Command {
 ให้นักศึกษาปรับหมุน Potentiometer ไปที่ตำแหน่งมุมต่างๆ 5 ระดับ แล้วบันทึกค่าที่ปรากฏในระบบทั้ง 3 ส่วนลงในตาราง
 
 | ตำแหน่งการหมุน | ค่า Raw ADC บน ESP32 ($0-4095$) | ค่าคำนวณบน Kestrel Server (%) | ค่าบนเว็บเกจ SVG (%) | แถบ Gauge บน OLED จริง (ตรง/ไม่ตรง) | โหมดที่แสดงบน Zone 3 |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| หมุนซ้ายสุด ($0^\circ$) | | | | [ ] ตรง [ ] ไม่ตรง | |
-| หมุนประมาณ $45^\circ$ | | | | [ ] ตรง [ ] ไม่ตรง | |
-| กึ่งกลาง ($90^\circ$) | | | | [ ] ตรง [ ] ไม่ตรง | |
-| หมุนประมาณ $135^\circ$| | | | [ ] ตรง [ ] ไม่ตรง | |
-| หมุนขวาสุด ($180^\circ$)| | | | [ ] ตรง [ ] ไม่ตรง | |
+ :---: | :---: | :---: | :---: | :---: | :---: |
+| หมุนซ้ายสุด ($0^\circ$) | 0 | 0% | 0% | [ ✔ ] ตรง [ ] ไม่ตรง | READY |
+| หมุนประมาณ $45^\circ$ | 227 | 2% | 2% | [ ✔ ] ตรง [ ] ไม่ตรง | READY |
+| กึ่งกลาง ($90^\circ$) | 403 | 7% | 6.7% | [ ] ตรง [ ✔ ] ไม่ตรง | READY |
+| หมุนประมาณ $135^\circ$| 1023 | 23% | 23% | [ ✔ ] ตรง [ ] ไม่ตรง | READY |
+| หมุนขวาสุด ($180^\circ$)| 4095 | 100% | 100% | [ ✔ ] ตรง [ ] ไม่ตรง | READY |
 
 ---
 
