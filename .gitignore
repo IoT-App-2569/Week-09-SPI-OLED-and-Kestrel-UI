@@ -14,6 +14,8 @@ CMakeUserPresets.json
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build-v6
 /Example_codes/Lab9-1-SPI-OLED-Bringup/build
 /Example_codes/Lab9-1_OLED_BringUp/build
+Labcode/Lab9-1_OLED_BringUp/build/
+
 /Example_codes/Lab9-SPI-OLED-MultiZone/build
 /Lab9_Codes/ESP32.Kestrel.Webserver/bin
 /Lab9_Codes/ESP32.Kestrel.Webserver/obj
