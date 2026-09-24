@@ -261,6 +261,125 @@ void oled_flush(void)
     oled_send_data(s_oled_buffer, sizeof(s_oled_buffer));
 }
 ```
+```
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+#include "esp_err.h"
+
+// ---------------------------------------------------------
+// 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
+// ---------------------------------------------------------
+#define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+#define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
+#define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
+#define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
+#define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+
+static spi_device_handle_t s_spi_handle = NULL;
+
+// ---------------------------------------------------------
+// 2. ฟังก์ชันกำหนดค่าเริ่มต้นพิน GPIO และบัสฮาร์ดแวร์ SPI2
+// ---------------------------------------------------------
+esp_err_t oled_spi_init(void)
+{
+    // กำหนดขา DC และ RES เป็น Output
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+
+    // กำหนดค่าบัส SPI (Master Out Only - ไม่ใช้ MISO)
+    spi_bus_config_t buscfg = {
+        .miso_io_num = -1,               // จอนี้ Write-Only ไม่มีขา MISO
+        .mosi_io_num = OLED_PIN_MOSI,     // GPIO 23
+        .sclk_io_num = OLED_PIN_SCK,      // GPIO 18
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 1024 + 16,
+    };
+
+    // ใช้ SPI2_HOST (VSPI บน ESP32)
+    esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+    if (ret != ESP_OK) return ret;
+
+    // ผูก Device เข้ากับ Bus (ความถี่ 10 MHz, SPI Mode 0)
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = 10 * 1000 * 1000, // 10 MHz แสดงผลลื่นไหล
+        .mode = 0,                          // Mode 0: CPOL=0, CPHA=0
+        .spics_io_num = OLED_PIN_CS,        // GPIO 5
+        .queue_size = 7,
+    };
+
+    return spi_bus_add_device(SPI2_HOST, &devcfg, &s_spi_handle);
+}
+
+// ---------------------------------------------------------
+// 3. ฟังก์ชันส่งคำสั่ง 1 ไบต์ (Command: DC = 0)
+// ---------------------------------------------------------
+void oled_send_cmd(uint8_t cmd)
+{
+    gpio_set_level(OLED_PIN_DC, 0); // ดึง LOW เพื่อบอกชิปว่าเป็นคำสั่ง
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = 8; // 8 บิต (1 ไบต์)
+    t.tx_buffer = &cmd;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ---------------------------------------------------------
+// 4. ฟังก์ชันส่งบล็อกข้อมูลพิกเซล (Data: DC = 1)
+// ---------------------------------------------------------
+void oled_send_data(const uint8_t *data, size_t len)
+{
+    if (len == 0) return;
+    gpio_set_level(OLED_PIN_DC, 1); // ดึง HIGH เพื่อบอกชิปว่าเป็นข้อมูลพิกเซล
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = len * 8; // จำนวนบิต
+    t.tx_buffer = data;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ---------------------------------------------------------
+// app_main: Hardware Reset + Magic Sequence + ทดสอบถมหน้าจอ
+// ---------------------------------------------------------
+void app_main(void)
+{
+    // 1. เริ่มต้นระบบบัส SPI2 และตั้งค่าพิน DC/RES
+    ESP_ERROR_CHECK(oled_spi_init());
+
+    // 2. ลำดับการ Hardware Reset (ขา RES)
+    gpio_set_level(OLED_PIN_RES, 0); // ดึง LOW เพื่อเริ่มรีเซ็ต
+    vTaskDelay(pdMS_TO_TICKS(15));
+    gpio_set_level(OLED_PIN_RES, 1); // ดึง HIGH กลับพร้อมทำงาน
+    vTaskDelay(pdMS_TO_TICKS(15));
+
+    // 3. ส่งชุดคำสั่ง Magic Sequence เปิดวงจรทวีแรงดัน (Charge Pump) และเปิดจอ
+    oled_send_cmd(0xAE); // Display OFF
+    oled_send_cmd(0x8D); // Charge Pump Setting
+    oled_send_cmd(0x14); // Enable Charge Pump (ถ้าส่ง 0x10 จอจะดับสนิท!)
+    oled_send_cmd(0x20); // Addressing Mode
+    oled_send_cmd(0x00); // Horizontal Mode
+    oled_send_cmd(0xAF); // Display ON!
+
+    // 4. ทดสอบถมหน้าจอ (สว่างทั้งจอ 1,024 ไบต์)
+    uint8_t buffer[128];
+    memset(buffer, 0xFF, sizeof(buffer));
+    oled_send_cmd(0x21); oled_send_cmd(0x00); oled_send_cmd(0x7F);
+    oled_send_cmd(0x22); oled_send_cmd(0x00); oled_send_cmd(0x07);
+    for (int page = 0; page < 8; page++) {
+        oled_send_data(buffer, sizeof(buffer));
+    }
+}
+```
+<img width="1108" height="1477" alt="image" src="https://github.com/user-attachments/assets/0d0fb057-3777-4b91-8177-64b91b14f1e3" />
 
 #### การทดสอบพิกเซลใน `app_main()` (ขั้นตอนที่ 5)
 หลังจากสร้างฟังก์ชัน `oled_clear()`, `oled_draw_pixel()` และ `oled_flush()` เรียบร้อยแล้ว ให้นักศึกษากลับไปเพิ่มโค้ด **ขั้นตอนที่ 5** ใน `app_main()` ต่อท้ายขั้นตอนที่ 4 (ขั้นตอนทดสอบถมจอ) ดังนี้
@@ -277,6 +396,8 @@ void oled_flush(void)
     oled_draw_pixel(127, 63, true);  // มุมล่างขวา (โซนสีฟ้า)
     oled_flush();
 ```
+<img width="1108" height="1477" alt="image" src="https://github.com/user-attachments/assets/896539fe-28ba-4a1e-9ab6-3e9a889fbbc4" />
+
 
 > **ผลลัพธ์ที่ต้องสังเกต**  
 > คอมไพล์และอัปโหลดโปรแกรม จะพบว่า
@@ -399,6 +520,266 @@ void app_main(void)
 }
 ```
 
+<img width="1108" height="1477" alt="image" src="https://github.com/user-attachments/assets/87873767-29d4-4076-8db3-00b76901b885" />
+
+```
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+#include "esp_err.h"
+
+// ===========================================================
+// 1. กำหนดขาเชื่อมต่อตามแผนภาพวงจรจริง (GPIO 18, 23, 4, 2, 5)
+// ===========================================================
+#define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+#define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI MOSI Data)
+#define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
+#define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
+#define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+
+#define OLED_WIDTH      128
+#define OLED_HEIGHT     64
+#define OLED_PAGES      (OLED_HEIGHT / 8)   // 8 pages
+
+static spi_device_handle_t s_spi_handle = NULL;
+
+// Framebuffer ในแรม: จำลองพิกเซลทั้งจอก่อนส่งจริงด้วย oled_flush()
+static uint8_t s_framebuffer[OLED_WIDTH * OLED_PAGES]; // 128*8 = 1024 ไบต์
+
+// ===========================================================
+// 2. ฟังก์ชันกำหนดค่าเริ่มต้นพิน GPIO และบัสฮาร์ดแวร์ SPI2
+// ===========================================================
+esp_err_t oled_spi_init(void)
+{
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+
+    spi_bus_config_t buscfg = {
+        .miso_io_num = -1,
+        .mosi_io_num = OLED_PIN_MOSI,
+        .sclk_io_num = OLED_PIN_SCK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 1024 + 16,
+    };
+
+    esp_err_t ret = spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO);
+    if (ret != ESP_OK) return ret;
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = 10 * 1000 * 1000,
+        .mode = 0,
+        .spics_io_num = OLED_PIN_CS,
+        .queue_size = 7,
+    };
+
+    return spi_bus_add_device(SPI2_HOST, &devcfg, &s_spi_handle);
+}
+
+// ===========================================================
+// 3. ฟังก์ชันส่งคำสั่ง 1 ไบต์ (Command: DC = 0)
+// ===========================================================
+void oled_send_cmd(uint8_t cmd)
+{
+    gpio_set_level(OLED_PIN_DC, 0);
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = 8;
+    t.tx_buffer = &cmd;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ===========================================================
+// 4. ฟังก์ชันส่งบล็อกข้อมูลพิกเซล (Data: DC = 1)
+// ===========================================================
+void oled_send_data(const uint8_t *data, size_t len)
+{
+    if (len == 0) return;
+    gpio_set_level(OLED_PIN_DC, 1);
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = len * 8;
+    t.tx_buffer = data;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ===========================================================
+// 5. Framebuffer helpers (ส่วนที่ขาดหายไปจากโค้ดเดิม)
+// ===========================================================
+
+// ล้าง framebuffer ในแรมทั้งหมด (ยังไม่ส่งออกจอ ต้องเรียก oled_flush() ต่อ)
+void oled_clear(void)
+{
+    memset(s_framebuffer, 0x00, sizeof(s_framebuffer));
+}
+
+// วาด/ลบพิกเซลเดียวลงใน framebuffer (ยังไม่ส่งออกจอ)
+void oled_draw_pixel(int x, int y, bool color)
+{
+    if (x < 0 || x >= OLED_WIDTH || y < 0 || y >= OLED_HEIGHT) return;
+
+    int page = y / 8;
+    int bit  = y % 8;
+    int idx  = page * OLED_WIDTH + x;
+
+    if (color) {
+        s_framebuffer[idx] |= (1 << bit);
+    } else {
+        s_framebuffer[idx] &= ~(1 << bit);
+    }
+}
+
+// ส่ง framebuffer ทั้งก้อนออกไปยังจอจริงในครั้งเดียว
+void oled_flush(void)
+{
+    oled_send_cmd(0x21); oled_send_cmd(0x00); oled_send_cmd(OLED_WIDTH - 1);  // Column range
+    oled_send_cmd(0x22); oled_send_cmd(0x00); oled_send_cmd(OLED_PAGES - 1);  // Page range
+    oled_send_data(s_framebuffer, sizeof(s_framebuffer));
+}
+
+// ===========================================================
+// 6. ฟอนต์ 5x7 แบบง่าย (รองรับ: เว้นวรรค, 0-9, ':', A-Z ตัวใหญ่)
+//    แต่ละตัวอักษร = 5 ไบต์ (5 คอลัมน์), แต่ละไบต์แทน 8 แถวแนวตั้ง (bit0=บนสุด)
+// ===========================================================
+typedef struct {
+    char c;
+    uint8_t cols[5];
+} FontGlyph;
+
+static const FontGlyph s_font_table[] = {
+    {' ', {0x00,0x00,0x00,0x00,0x00}},
+    {'0', {0x3E,0x51,0x49,0x45,0x3E}},
+    {'1', {0x00,0x42,0x7F,0x40,0x00}},
+    {'2', {0x42,0x61,0x51,0x49,0x46}},
+    {'3', {0x21,0x41,0x45,0x4B,0x31}},
+    {'4', {0x18,0x14,0x12,0x7F,0x10}},
+    {'5', {0x27,0x45,0x45,0x45,0x39}},
+    {'6', {0x3C,0x4A,0x49,0x49,0x30}},
+    {'7', {0x01,0x71,0x09,0x05,0x03}},
+    {'8', {0x36,0x49,0x49,0x49,0x36}},
+    {'9', {0x06,0x49,0x49,0x29,0x1E}},
+    {':', {0x00,0x36,0x36,0x00,0x00}},
+    {'A', {0x7E,0x11,0x11,0x11,0x7E}},
+    {'B', {0x7F,0x49,0x49,0x49,0x36}},
+    {'C', {0x3E,0x41,0x41,0x41,0x22}},
+    {'D', {0x7F,0x41,0x41,0x22,0x1C}},
+    {'E', {0x7F,0x49,0x49,0x49,0x41}},
+    {'F', {0x7F,0x09,0x09,0x09,0x01}},
+    {'G', {0x3E,0x41,0x49,0x49,0x7A}},
+    {'H', {0x7F,0x08,0x08,0x08,0x7F}},
+    {'I', {0x00,0x41,0x7F,0x41,0x00}},
+    {'J', {0x20,0x40,0x41,0x3F,0x01}},
+    {'K', {0x7F,0x08,0x14,0x22,0x41}},
+    {'L', {0x7F,0x40,0x40,0x40,0x40}},
+    {'M', {0x7F,0x02,0x0C,0x02,0x7F}},
+    {'N', {0x7F,0x04,0x08,0x10,0x7F}},
+    {'O', {0x3E,0x41,0x41,0x41,0x3E}},
+    {'P', {0x7F,0x09,0x09,0x09,0x06}},
+    {'Q', {0x3E,0x41,0x51,0x21,0x5E}},
+    {'R', {0x7F,0x09,0x19,0x29,0x46}},
+    {'S', {0x46,0x49,0x49,0x49,0x31}},
+    {'T', {0x01,0x01,0x7F,0x01,0x01}},
+    {'U', {0x3F,0x40,0x40,0x40,0x3F}},
+    {'V', {0x1F,0x20,0x40,0x20,0x1F}},
+    {'W', {0x3F,0x40,0x38,0x40,0x3F}},
+    {'X', {0x63,0x14,0x08,0x14,0x63}},
+    {'Y', {0x07,0x08,0x70,0x08,0x07}},
+    {'Z', {0x61,0x51,0x49,0x45,0x43}},
+};
+#define FONT_TABLE_SIZE (sizeof(s_font_table) / sizeof(s_font_table[0]))
+
+static const uint8_t *font_lookup(char c)
+{
+    for (size_t i = 0; i < FONT_TABLE_SIZE; i++) {
+        if (s_font_table[i].c == c) return s_font_table[i].cols;
+    }
+    return s_font_table[0].cols; // ไม่พบตัวอักษร -> วาดเป็นช่องว่าง
+}
+
+// วาดตัวอักษร 1 ตัว ลง framebuffer ที่ตำแหน่ง (x0, y0) มุมบนซ้าย
+void oled_draw_char(int x0, int y0, char c, bool color)
+{
+    const uint8_t *cols = font_lookup(c);
+    for (int col = 0; col < 5; col++) {
+        uint8_t line = cols[col];
+        for (int row = 0; row < 8; row++) {
+            if (line & (1 << row)) {
+                oled_draw_pixel(x0 + col, y0 + row, color);
+            }
+        }
+    }
+}
+
+// วาดข้อความ (รองรับเฉพาะตัวใหญ่/ตัวเลข/':' /เว้นวรรค) แต่ละตัวเว้น 1 คอลัมน์ (รวม 6 พิกเซล/ตัว)
+void oled_draw_string(int x, int y, const char *text, bool color)
+{
+    int cx = x;
+    while (*text) {
+        oled_draw_char(cx, y, *text, color);
+        cx += 6;
+        text++;
+    }
+}
+
+// ===========================================================
+// app_main
+// ===========================================================
+void app_main(void)
+{
+    // 1. เริ่มต้นระบบบัส SPI2 และตั้งค่าพิน DC/RES
+    ESP_ERROR_CHECK(oled_spi_init());
+
+    // 2. ลำดับการ Hardware Reset (ขา RES)
+    gpio_set_level(OLED_PIN_RES, 0);
+    vTaskDelay(pdMS_TO_TICKS(15));
+    gpio_set_level(OLED_PIN_RES, 1);
+    vTaskDelay(pdMS_TO_TICKS(15));
+
+    // 3. ส่งคำสั่งเปิดวงจรทวีแรงดัน (Charge Pump) และเปิดจอ
+    oled_send_cmd(0xAE); // Display OFF
+    oled_send_cmd(0x8D); // Charge Pump Setting
+    oled_send_cmd(0x14); // Enable Charge Pump (ถ้าส่ง 0x10 จอจะดับสนิท!)
+    oled_send_cmd(0x20); // Addressing Mode
+    oled_send_cmd(0x00); // Horizontal Mode
+    oled_send_cmd(0xAF); // Display ON!
+
+    // 4. ทดสอบถมหน้าจอ (สว่างทั้งจอ 1,024 ไบต์)
+    uint8_t buffer[128];
+    memset(buffer, 0xFF, sizeof(buffer));
+    oled_send_cmd(0x21); oled_send_cmd(0x00); oled_send_cmd(0x7F);
+    oled_send_cmd(0x22); oled_send_cmd(0x00); oled_send_cmd(0x07);
+    for (int page = 0; page < 8; page++) {
+        oled_send_data(buffer, sizeof(buffer));
+    }
+    vTaskDelay(pdMS_TO_TICKS(1500)); // โชว์จอขาว 1.5 วินาที
+
+    // 5. ทดสอบจุด 4 มุมจอ (Corner Pixels Test)
+    oled_clear();
+    oled_draw_pixel(0, 0, true);
+    oled_draw_pixel(127, 0, true);
+    oled_draw_pixel(0, 63, true);
+    oled_draw_pixel(127, 63, true);
+    oled_flush();
+    vTaskDelay(pdMS_TO_TICKS(1500));
+
+    // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
+    oled_clear();
+    oled_draw_string(30, 4, "WUTIICHAI", true);
+    oled_draw_string(24, 32, "ID: 67030216", true);
+    oled_flush();
+}
+```
+
 > [!IMPORTANT]
 > **ภารกิจสังเกตการณ์เชิงลึก (Forensic Visual Observation Challenge)**
 > หลังจากรันโค้ดและข้อความแสดงขึ้นมาบนจอภาพ ให้นักศึกษาหยุดสังเกตความผิดปกติทางกายภาพอย่างละเอียด
@@ -435,5 +816,25 @@ for (int i = 0; i < 16; i++) {
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล (Review Questions)
 1. จากการทำ Hex Dump ในกิจกรรมนิติวิทยาศาสตร์ จงอธิบายว่าทำไมตัวอักษร `'H'` จึงใช้ข้อมูลจำนวน 5 ไบต์ และแต่ละไบต์ทำหน้าที่ควบคุมพิกเซลในทิศทางใด?
+```
+สาเหตุที่ใช้ 5 ไบต์ เนื่องจากตารางฟอนต์มาตรฐาน (font5x7.h) ที่ใช้ในระบบออกแบบมาให้ตัวอักษรมีความกว้าง 5 พิกเซล โดยแต่ละคอลัมน์ในแนวตั้งจะใช้ข้อมูลขนาด 1 ไบต์ (8 บิต) แทนกลุ่มพิกเซลในแนวตั้ง (Pixel Row) ความสูง 8 แถวต่อ 1 เพจ ดังนั้น ตัวอักษร 1 ตัวจึงใช้พื้นที่ในแนวนอนทั้งหมด 5 คอลัมน์ จึงต้องใช้ข้อมูลรวมทั้งสิ้น 5 ไบต์
+
+หน้าที่ของแต่ละไบต์ในทิศทางพิกเซล
+แต่ละไบต์จะควบคุมพิกเซลใน แนวตั้ง (Vertical Column) ความสูง 8 บิต (ตั้งแต่บิตที่ 0 ถึงบิตที่ 7)
+บิตที่มีค่าเป็น 1 จะหมายถึงการสั่งให้พิกเซลในตำแหน่งนั้นสว่างขึ้น (เปิดไฟ OLED) และบิตที่มีค่าเป็น 0 จะหมายถึงการดับพิกเซล
+เมื่อนำไบต์ทั้ง 5 มาเรียงต่อกันในแนวนอนจากซ้ายไปขวา (Col 0 ถึง Col 4) จึงประกอบกันกลายเป็นรูปร่างของตัวอักษรขึ้นมา
+```
 2. หากเราสลับสายไฟระหว่างขา **D0** และ **D1** จะเกิดผลอย่างไรกับสัญญาณ SPI และหน้าจอจะติดหรือไม่?
+```
+ผลลัพธ์ต่อหน้าจอ หน้าจอจะ ไม่ติดและไม่สามารถแสดงผลใด ๆ ได้เลย (จอจะมืดสนิท หรือค้างสถานะเดิมก่อนหน้า)
+
+ผลลัพธ์ต่อสัญญาณ SPI
+สัญญาณนาฬิกา (Clock - SCK) และสัญญาณข้อมูล (MOSI) จะสลับหน้าที่กัน ชิป SSD1306 จะไม่สามารถอ่านจังหวะสัญญาณนาฬิกาเพื่อเก็บบันทึกข้อมูลบิตที่ส่งมาจาก ESP32 ได้อย่างถูกต้อง
+ส่งผลให้ชุดคำสั่งเริ่มต้นระบบ (Magic Sequence) และข้อมูลพิกเซลเกิดความเสียหาย (Data Corruption) การสื่อสารผ่านบัส SPI จะล้มเหลวทันที
+```
 3. เหตุใดการแก้ไขพิกัด $(x, y)$ บน `s_oled_buffer` จึงไม่ทำให้ภาพบนหน้าจอจริงเปลี่ยนทันที จนกว่าจะมีการเรียกคำสั่ง `oled_flush()`?
+```
+สาเหตุ ตัวแปร s_oled_buffer (หรือ s_framebuffer) เป็นหน่วยความจำประเภท Back Buffer (RAM) ที่จำลองขึ้นในแรมของไมโครคอนโทรลเลอร์ ESP32 เท่านั้น การเรียกฟังก์ชัน oled_draw_pixel() เป็นการแก้ไขข้อมูลตัวเลขทางซอฟต์แวร์ภายในแรมชั่วคราว
+
+หน้าจอ OLED ภายนอกจะยังไม่รับรู้การเปลี่ยนแปลงนี้จนกว่าจะมีการเรียกคำสั่ง oled_flush() ซึ่งเป็นฟังก์ชันที่ทำหน้าที่ ส่งถ่ายข้อมูลทั้งหมด (Bulk Transfer) ขนาด 1,024 ไบต์จากแรมของ ESP32 ข้ามผ่านบัส SPI ไปยังหน่วยความจำ Framebuffer ภายในชิป SSD1306 ทีเดียวพร้อมกัน หน้าจอจึงจะทำการเรนเดอร์ภาพใหม่ขึ้นมาพร้อมกันในคราวเดียว (ช่วยป้องกันปัญหาภาพกระพริบ Screen Tearing)
+```
