@@ -1,0 +1,6 @@
+"-specs=D:/iot/Week-09-SPI-OLED-and-Kestrel-UI/Lab9-1_OLED_BringUp/build/bootloader/specs/picolibc.specs"
+-Wno-frame-address
+-mlongcalls
+-fno-builtin-memcpy
+-fno-builtin-memset
+-fno-builtin-bzero
