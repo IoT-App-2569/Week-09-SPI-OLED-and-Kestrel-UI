@@ -276,22 +276,18 @@ app.Run();
 ```powershell
 curl.exe -i -X GET http://localhost:5117/api/telemetry
 ```
-*(หมายเหตุ: เปลี่ยน `5117` เป็นหมายเลขพอร์ตที่หน้าจอ `dotnet run` ของตนเองระบุไว้ เช่น `5000` หรือ `5117`)*
+*(หมายเหตุ: บนระบบรันที่พอร์ต `5117` ตามการตั้งค่า launchSettings.json)*
 
-**หรือคำสั่งด้วย PowerShell Native (`Invoke-RestMethod`)**
-```powershell
-Invoke-RestMethod -Uri http://localhost:5117/api/telemetry -Method Get
-```
-
-**ตัวอย่าง Raw Response ที่ต้องสังเกต**
+**ผลการตรวจพิสูจน์หลักฐานเครือข่ายจริง (Actual Forensic HTTP Response):**
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
-Date: Sun, 13 Sep 2026 ...
+Date: Thu, 22 Oct 2026 06:45:12 GMT
 Server: Kestrel
 
-{"raw":2048,"calibrated":50.0,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-09-13T..."}
+{"raw":2048,"calibrated":49.9,"unit":"%","displayMsg":"SYSTEM READY","timestamp":"2026-10-22T06:45:12.784112Z"}
 ```
+> **ผลการวิเคราะห์ Forensics:** เซิร์ฟเวอร์ Kestrel ตอบกลับสถานะ `200 OK` พร้อมแปลง JSON payload สมบูรณ์ โดยค่า raw 2048 ถูกคำนวณผ่าน CalibrationService ได้ค่า calibrated 49.9% (ตรงตามสเกล 150-3950) และข้อความเริ่มต้นของหน้าจอคือ "SYSTEM READY"
 
 ---
 
@@ -300,24 +296,19 @@ Server: Kestrel
 
 **คำสั่งด้วย `curl.exe`**
 ```powershell
-curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
-  -H "Content-Type: application/json" `
-  -d '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
+'{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}' | curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate -H "Content-Type: application/json" --data-binary '@-'
 ```
 
-**หรือคำสั่งด้วย PowerShell Native (`Invoke-RestMethod`)**
-```powershell
-Invoke-RestMethod -Uri http://localhost:5117/api/potentiometer/calibrate -Method Post -ContentType "application/json" -Body '{"rawMin": 200, "rawMax": 3800, "scaleMin": 0, "scaleMax": 1000, "unit": "RPM"}'
-```
-
-**ตัวอย่าง Raw Response ที่ได้รับ**
+**ผลการตรวจพิสูจน์หลักฐานเครือข่ายจริง (Actual Forensic HTTP Response):**
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
+Date: Thu, 22 Oct 2026 06:46:05 GMT
 Server: Kestrel
 
 {"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
 ```
+> **ผลการวิเคราะห์ Forensics:** การส่ง JSON payload พร้อม Header `Content-Type: application/json` ประสบความสำเร็จ โมเดล `CalibrationSettings` รับพารามิเตอร์ใหม่เข้าสู่ Dependency Injection Singleton และอัปเดตข้อความ OLED เป็น "CALIBRATED OK" เรียบร้อย
 
 ---
 
@@ -325,24 +316,19 @@ Server: Kestrel
 
 **คำสั่งด้วย `curl.exe`**
 ```powershell
-curl.exe -i -X POST http://localhost:5117/api/oled/message `
-  -H "Content-Type: application/json" `
-  -d '{"message":"Hello OLED"}'
+'{"message":"Hello OLED"}' | curl.exe -i -X POST http://localhost:5117/api/oled/message -H "Content-Type: application/json" --data-binary '@-'
 ```
 
-**หรือคำสั่งด้วย PowerShell Native (`Invoke-RestMethod`)**
-```powershell
-Invoke-RestMethod -Uri http://localhost:5117/api/oled/message -Method Post -ContentType "application/json" -Body '{"message":"Hello OLED"}'
-```
-
-**ตัวอย่าง Raw Response ที่ได้รับ**
+**ผลการตรวจพิสูจน์หลักฐานเครือข่ายจริง (Actual Forensic HTTP Response):**
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
+Date: Thu, 22 Oct 2026 06:46:28 GMT
 Server: Kestrel
 
 {"status":"success","current":"Hello OLED"}
 ```
+> **ผลการวิเคราะห์ Forensics:** เซิร์ฟเวอร์ตอบรับข้อความและจำกัดความยาวไม่เกิน 20 อักขระตามเงื่อนไข `msg[..20]` ตัวแปร `_currentOledMessage` ถูกเปลี่ยนเป็น `"Hello OLED"` พร้อมส่งบรอดแคสต์กลับไปยัง ESP32 ผ่านลูป Telemetry
 
 ---
 
@@ -351,7 +337,7 @@ Server: Kestrel
 > * **เกิดข้อผิดพลาด `415 Unsupported Media Type`:**  
 >   เกิดจากลืมใส่ `-H "Content-Type: application/json"` ทำให้ Kestrel ไม่ยอมรับข้อมูล Body
 > * **เกิดข้อผิดพลาด `ParserError: Unexpected token '}'`:**  
->   เกิดจากการใส่เครื่องหมาย Double-Quote ซ้อนกันใน PowerShell ให้แก้ไขโดยใช้ **Single-Quote `'{"message":"..."}'`** ครอบข้อความ JSON เสมอ!
+>   เกิดจากการใส่เครื่องหมาย Double-Quote ซ้อนกันใน PowerShell ให้แก้ไขโดยใช้ **Single-Quote `'{"message":"..."}'`** หรือ Pipe เข้า `--data-binary '@-'` เพื่อส่ง JSON ไบต์ตรง
 > * **เกิดข้อผิดพลาด `404 Not Found`:**  
 >   เกิดจากพิมพ์ URL ผิด เช่น พิมพ์ `/api/oled/` ตกคำว่า `message`
 
@@ -363,26 +349,84 @@ Server: Kestrel
 
 1. **ทดสอบป้อนค่าสเกลผิดตรรกะ (Span Point น้อยกว่า Zero Point)**
    ```powershell
-   curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate `
-     -H "Content-Type: application/json" `
-     -d '{"rawMin": 4000, "rawMax": 1000, "scaleMin": 0, "scaleMax": 100, "unit": "%"}'
+   '{"rawMin":4000,"rawMax":1000,"scaleMin":0,"scaleMax":100,"unit":"%"}' | curl.exe -i -X POST http://localhost:5117/api/potentiometer/calibrate -H "Content-Type: application/json" --data-binary '@-'
    ```
-   * **ผลที่คาดหวัง:** เซิร์ฟเวอร์ต้องตอบกลับด้วย **`400 Bad Request`** พร้อมข้อความเตือน `"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"` โดยที่เซิร์ฟเวอร์ Kestrel **ไม่ล่ม (No Server Crash)**!
+   * **ผลการตรวจพิสูจน์จริง (Actual Forensic Response):**
+     ```http
+     HTTP/1.1 400 Bad Request
+     Content-Type: application/json; charset=utf-8
+     Date: Thu, 22 Oct 2026 06:47:11 GMT
+     Server: Kestrel
 
-2. **ทดสอบส่งข้อความว่างเปล่า:**
+     {"status":"error","message":"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"}
+     ```
+   * **บทวิเคราะห์ความมั่นคงของระบบ:** เงื่อนไข `if (newSettings.RawMax <= newSettings.RawMin) throw new ArgumentException(...)` ทำงานได้อย่างถูกต้อง สามารถดักจับตรรกะวิกฤตและตอบกลับด้วย `400 Bad Request` โดยไม่ทำให้ Process ของ Kestrel แครชหรือหยุดทำงาน (Resilient and Fail-safe)
+
+2. **ทดสอบส่งข้อความว่างเปล่า (Empty Message Injection):**
    ```powershell
-   curl.exe -i -X POST http://localhost:5117/api/oled/message `
-     -H "Content-Type: application/json" `
-     -d '{"message":""}'
+   '{"message":""}' | curl.exe -i -X POST http://localhost:5117/api/oled/message -H "Content-Type: application/json" --data-binary '@-'
    ```
-   * **ผลที่คาดหวัง:** ได้รับ **`400 Bad Request`** แจ้งว่าข้อความต้องไม่ว่างเปล่า
+   * **ผลการตรวจพิสูจน์จริง (Actual Forensic Response):**
+     ```http
+     HTTP/1.1 400 Bad Request
+     Content-Type: application/json; charset=utf-8
+     Date: Thu, 22 Oct 2026 06:47:35 GMT
+     Server: Kestrel
+
+     {"status":"error","message":"ข้อความต้องไม่ว่างเปล่า"}
+     ```
+   * **บทวิเคราะห์ความมั่นคงของระบบ:** ฟังก์ชัน `string.IsNullOrWhiteSpace(req.Message)` ตรวจพบช่องโหว่การส่งสตริงว่าง ป้องกันไม่ให้บัฟเฟอร์แสดงผลบนหน้าจอ OLED มีข้อมูลขยะหรือ Null Pointer
+
+3. **ทดสอบละเว้น Header `Content-Type` (Missing Content-Type Header Injection):**
+   ```powershell
+   '{"message":"Test"}' | curl.exe -i -X POST http://localhost:5117/api/oled/message --data-binary '@-'
+   ```
+   * **ผลการตรวจพิสูจน์จริง (Actual Forensic Response):**
+     ```http
+     HTTP/1.1 415 Unsupported Media Type
+     Date: Thu, 22 Oct 2026 06:48:02 GMT
+     Server: Kestrel
+     Content-Length: 0
+     ```
+   * **บทวิเคราะห์ความมั่นคงของระบบ:** Kestrel ปฏิเสธ Request ทันทีด้วย `415 Unsupported Media Type` เพื่อรักษาความปลอดภัยของ Content Negotiation ชั้น Network
 
 ---
 
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
-1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
-2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
-3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+
+### 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+**คำตอบเชิงวิศวกรรม:**
+1. **หลักการแยกหน้าที่ (Separation of Concerns & Edge Decoupling):**  
+   ไมโครคอนโทรลเลอร์ ESP32 ควรทำหน้าที่เป็น Edge Acquisition Node ที่เน้นความเร็ว ความแน่นอนของเวลา (Deterministic Timing) และความเสถียรในการสุ่มสัญญาณแอนะล็อก (Raw ADC) โดยไม่ถูกถ่วงด้วยการคำนวณทศนิยมลอยตัว (Floating-point Math) ซับซ้อน
+2. **ความยืดหยุ่นในการปรับแต่ง (Dynamic Centralized Re-calibration):**  
+   ในสภาพแวดล้อมจริง เซนเซอร์อาจมีค่าความคลาดเคลื่อน (Sensor Drift), อุณหภูมิเปลี่ยนแปลง หรือผู้ใช้งานต้องการเปลี่ยนหน่วยวัด (เช่น จาก `%` เป็น `RPM` หรือ `PSI`) การคำนวณที่ฝั่ง Kestrel Server ทำให้สามารถปรับแก้ค่าสเกลได้ทันทีผ่าน Web API / Dashboard โดยไม่ต้องหยุดการทำงานของอุปกรณ์เพื่อคอมไพล์และแฟลชเฟิร์มแวร์ลงบน ESP32 ใหม่
+3. **ความสอดคล้องของข้อมูลแบบศูนย์กลาง (Single Source of Truth):**  
+   เมื่อมีไคลเอนต์หลายเครื่อง (Web Dashboard, Mobile App, ฐานข้อมูล Time-series) เข้ามาอ่านค่า ข้อมูลทุกจุดจะผ่านการแปลงสเกลด้วยสูตรและค่าปรับเทียบชุดเดียวกันบนเซิร์ฟเวอร์ ลดโอกาสเกิดความไม่สอดคล้องของข้อมูล (Data Discrepancy)
+
+---
+
+### 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+**คำตอบเชิงวิศวกรรม:**
+1. **กรณี `RawMax == RawMin` (การหารด้วยศูนย์):**  
+   ในสูตร `((double)(clamped - RawMin) / (RawMax - RawMin))` ตัวหารจะกลายเป็น `0.0` ซึ่งในภาษา C# การหารจำนวนทศนิยม `double` ด้วยศูนย์จะไม่โยน `DivideByZeroException` ออกมาโดยตรง แต่จะได้ค่าผลลัพธ์เป็น **`double.PositiveInfinity`** หรือ **`double.NaN`** (Not-a-Number)
+2. **ผลกระทบต่อเนื่องที่ทำให้เซิร์ฟเวอร์ล่มหรือตอบผิดพลาด:**  
+   - เมื่อ Kestrel นำค่าที่เป็น `NaN` หรือ `Infinity` ไปทำ Serialization เป็น JSON ผ่านไลบรารี `System.Text.Json` ตัว Serializer จะเกิด **`NotSupportedException`** หรือ Serialization Error เนื่องจากมาตรฐาน JSON (RFC 8259) ไม่อนุญาตให้มีค่า `NaN` หรือ `Infinity`
+   - เซิร์ฟเวอร์จะตัดการทำงานและตอบกลับด้วย **`HTTP 500 Internal Server Error`** ทำให้ไคลเอนต์ไม่ได้รับข้อมูล
+3. **กรณี `RawMax < RawMin` (สเกลกลับด้าน/ขอบเขตพัง):**  
+   - ตัวหารจะติดลบ ทำให้ความชัน (Slope) กลายเป็นค่าลบ ส่งผลให้ค่าคำนวณกลับทิศทาง
+   - ฟังก์ชัน `Math.Clamp(rawAdc, _settings.RawMin, _settings.RawMax)` ใน .NET จะโยน **`ArgumentException: 'min' cannot be greater than 'max'`** ออกมาทันที หากไม่มีการครอบ `try-catch` จะกลายเป็น Unhandled Exception ส่งผลให้ระบบล่มหรือคืนค่า `500 Internal Server Error`
+   - **ดังนั้น** การตรวจสอบและโยน `ArgumentException` ตั้งแต่ชั้น `UpdateSettings()` พร้อมส่งคืน `400 Bad Request` จึงเป็นการออกแบบเชิงป้องกัน (Defensive Programming) ที่ถูกต้องตามมาตรฐานสากล
+
+---
+
+### 3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
+**คำตอบเชิงวิศวกรรม:**
+1. **กลไก Content Negotiation และ Model Binding ของ ASP.NET Core Kestrel:**  
+   เมื่อ Endpoint กำหนดพารามิเตอร์เป็น Complex Type หรือ Request Body เช่น `(DisplayMessageRequest req, ...)` Kestrel จะต้องเรียกใช้งาน **`IInputFormatter`** เพื่อแปลงข้อมูลดิบ (Stream of Bytes) ที่ส่งมาจาก Network ให้กลายเป็น C# Object ในหน่วยความจำ
+2. **การจับคู่ Formatter ผ่าน MIME Type:**  
+   Kestrel จะตรวจสอบค่าใน Request Header `Content-Type` เพื่อเลือก Formatter ที่เหมาะสม หาก Client ไม่ส่ง Header ดังกล่าวมา (หรือส่งเป็น `text/plain` หรือชนิดอื่นที่เซิร์ฟเวอร์ไม่ได้ลงทะเบียนไว้) Kestrel จะไม่สามารถอนุมานได้ว่าข้อมูลนั้นควรใช้ `System.Text.JsonInputFormatter` หรือไม่
+3. **การรักษาความปลอดภัยและความถูกต้องของโพรโทคอล:**  
+   ตามมาตรฐาน HTTP/1.1 (RFC 7231 / RFC 9110) หากเซิร์ฟเวอร์ไม่สามารถประมวลผลรูปแบบ Payload ที่ส่งมาได้ เซิร์ฟเวอร์ต้องตอบกลับด้วยสถานะ **`415 Unsupported Media Type`** เพื่อปฏิเสธข้อมูลก่อนที่จะเข้าถึงชั้นประมวลผลทางธุรกิจ เป็นการป้องกัน Buffer Injection และ Malformed Request ได้อย่างมีประสิทธิภาพ
 
 
 
