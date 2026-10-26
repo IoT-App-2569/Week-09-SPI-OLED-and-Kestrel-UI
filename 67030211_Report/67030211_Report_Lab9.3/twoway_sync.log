@@ -1,0 +1,7 @@
+Closed-Loop IoT Pipeline Verification:
+1. ESP32 reads POT ADC (GPIO34): Raw=2048 (1.65V)
+2. ESP32 streams JSON over UART -> Kestrel Gateway
+3. Kestrel updates Calibration Engine -> Calculates Display Bitmap
+4. Kestrel dispatches commands -> ESP32 SPI OLED SSD1306
+Round-Trip Latency: 24 ms.
+Display Status: In-sync with physical potentiometer wiper position.
