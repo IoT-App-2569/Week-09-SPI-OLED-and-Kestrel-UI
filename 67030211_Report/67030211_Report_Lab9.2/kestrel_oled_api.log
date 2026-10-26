@@ -1,3 +1,0 @@
-POST /api/oled/calibrate
-Payload: {"Raw": 2048, "Gain": 1.02, "Offset": -0.01}
-Response 200 OK: {"calibratedVoltage": 1.67, "raw": 2048}

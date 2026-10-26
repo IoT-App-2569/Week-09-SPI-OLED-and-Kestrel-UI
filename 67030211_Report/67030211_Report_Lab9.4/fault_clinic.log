@@ -1,6 +1,0 @@
-OLED SSD1306 Engineering Fault Clinic:
-Case 1: SPI Clock Speed Comparison
-- 1 MHz:  Render time = 8.2 ms (Slight visible tearing during fast rotation)
-- 10 MHz: Render time = 0.8 ms (Smooth 60 FPS, no tearing)
-Case 2: Charge Pump Capacitor
-- Tested with 0.1uF ceramic capacitor on C1P/C1N pins. Display brightness stable at 100%.
