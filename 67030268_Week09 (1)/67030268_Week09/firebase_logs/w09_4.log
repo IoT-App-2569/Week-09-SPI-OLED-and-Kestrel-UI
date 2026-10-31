@@ -1,0 +1,7 @@
+ets Jul 29 2019 12:21:46
+I (410) FAULT_CLINIC: Investigator: นายกร แดงทอง (67030268)
+I (415) FAULT_CLINIC: Target Incident Case: Case 2: Garbled Screen
+I (520) FAULT_CLINIC: Physical Symptom Confirmed: Bitwise Framebuffer addressing bug index = x + (y / 8) * 128
+I (640) FAULT_CLINIC: Root cause verified in memory & command stream
+I (780) FAULT_CLINIC: Executing patch: int index = x + (y / 8) * 128; int bit = y % 8;
+I (920) FAULT_CLINIC: Hardware & Software audit: PASSED. Status: RESOLVED
