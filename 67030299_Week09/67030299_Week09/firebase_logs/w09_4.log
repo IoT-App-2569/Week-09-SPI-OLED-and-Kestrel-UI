@@ -1,0 +1,7 @@
+ets Jul 29 2019 12:21:46
+I (410) FAULT_CLINIC: Investigator: นางสาวธนพร พิศมัย (67030299)
+I (415) FAULT_CLINIC: Target Incident Case: Case 3: Upside-down Display
+I (520) FAULT_CLINIC: Physical Symptom Confirmed: SSD1306 hardware scan default COM0-COM[N-1] orientation
+I (640) FAULT_CLINIC: Root cause verified in memory & command stream
+I (780) FAULT_CLINIC: Executing patch: oled_send_cmd(0xA1); oled_send_cmd(0xC8);
+I (920) FAULT_CLINIC: Hardware & Software audit: PASSED. Status: RESOLVED
