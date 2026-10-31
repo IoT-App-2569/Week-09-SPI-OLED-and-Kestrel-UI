@@ -7,6 +7,17 @@
 #include "string.h"            // สำหรับ memset()
 #include "font5x7.h"           // ตาราง ASCII 5x7 Font Matrix
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  ((byte) & 0x80 ? '1' : '0'), \
+  ((byte) & 0x40 ? '1' : '0'), \
+  ((byte) & 0x20 ? '1' : '0'), \
+  ((byte) & 0x10 ? '1' : '0'), \
+  ((byte) & 0x08 ? '1' : '0'), \
+  ((byte) & 0x04 ? '1' : '0'), \
+  ((byte) & 0x02 ? '1' : '0'), \
+  ((byte) & 0x01 ? '1' : '0')
+
 
 // --- 1. กำหนดขา GPIO ตามวงจรจริงในไดอะแกรม (Images/Lab9-1-connection.svg) ---
 #define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
@@ -191,6 +202,20 @@ void app_main(void)
     // 6. พิมพ์ข้อความ Hello World และ รหัสนักศึกษา
     oled_clear();
     oled_draw_string(30, 4, "HELLO WORLD", true);   // โซนสีเหลือง
-    oled_draw_string(24, 32, "ID: 65012345", true);  // โซนสีฟ้า
+    oled_draw_string(24, 32, "ID: 67030021", true);
     oled_flush();
+
+    // กิจกรรมนิติวิทยาศาสตร์ 1.1 Hex Dump Memory Inspection
+    ESP_LOGI("FORENSIC", "=== DUMPING FRAMEBUFFER PAGE 0 (First 16 Bytes: Col 0-15) ===");
+    for (int i = 0; i < 16; i++) {
+        printf("Byte[%2d] (Col %2d): 0x%02X  [Binary: " BYTE_TO_BINARY_PATTERN "]\n", 
+               i, i, s_oled_buffer[i], BYTE_TO_BINARY(s_oled_buffer[i]));
+    }
+
+    ESP_LOGI("FORENSIC", "=== DUMPING FRAMEBUFFER PAGE 0 (Col 30-45: 'H' at Col 30) ===");
+    for (int i = 30; i < 46; i++) {
+        printf("Byte[%2d] (Col %2d): 0x%02X  [Binary: " BYTE_TO_BINARY_PATTERN "]\n", 
+               i, i, s_oled_buffer[i], BYTE_TO_BINARY(s_oled_buffer[i]));
+    }
+
 }

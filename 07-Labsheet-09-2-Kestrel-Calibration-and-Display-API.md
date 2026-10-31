@@ -379,10 +379,93 @@ Server: Kestrel
 
 ---
 
-## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
+---
+
+### สรุปผลการพิสูจน์หลักฐานเครือข่าย (HTTP Request/Response Forensics Record)
+
+**1. ภาพการทดสอบอ่านข้อมูล Telemetry (GET /api/telemetry):**
+![](Images/lab9-2-telemetry.png)
+
+**2. ภาพการทดสอบ Calibrate เซนเซอร์และส่งข้อความ OLED (POST):**
+![](Images/lab9-2-calibrate.jpg)
+
+**3. ภาพการทดสอบฉีดข้อมูลวิกฤต Fault Injection & Zero-Crash (400 Bad Request):**
+![](Images/lab9-2-fault-injection.jpg)
+
+
+จากการทดสอบรันเซิร์ฟเวอร์ Kestrel (.NET 10) ที่พอร์ต 5200 และตรวจสอบ Raw HTTP Headers ผ่าน `curl.exe -i`:
+
+#### 1. ผลการทดสอบ `GET /api/telemetry` (200 OK)
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 Oct 2026 17:04:40 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"raw":0,"calibrated":0,"unit":"%","displayMsg":"SYSTEM READY","isConnected":false,"kestrelLatencyMs":0,"timestamp":"2026-10-31T17:04:40.9793553Z"}
+```
+
+#### 2. ผลการทดสอบ `POST /api/potentiometer/calibrate` (200 OK)
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 Oct 2026 17:04:40 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"status":"success","settings":{"rawMin":200,"rawMax":3800,"scaleMin":0,"scaleMax":1000,"unit":"RPM"}}
+```
+
+#### 3. ผลการทดสอบ `POST /api/oled/message` (200 OK)
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 Oct 2026 17:05:18 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"status":"success","current":"Hello OLED"}
+```
+
+#### 4. ผลการทดสอบ Fault Injection 1: สเกลผิดตรรกะ `rawMax <= rawMin` (400 Bad Request)
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 Oct 2026 17:04:40 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"status":"error","message":"RawMax ต้องมีค่ามากกว่า RawMin เสมอ!"}
+```
+
+#### 5. ผลการทดสอบ Fault Injection 2: ส่งข้อความว่างเปล่า `message: ""` (400 Bad Request)
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Date: Sat, 31 Oct 2026 17:04:40 GMT
+Server: Kestrel
+Transfer-Encoding: chunked
+
+{"status":"error","message":"ข้อความต้องไม่ว่างเปล่า"}
+```
+
+---
+
+## 5. คำถามท้ายการทดลองเพื่อการประเมินผล (Review Questions)
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
+   - **คำตอบ:** 
+     - **ลดภาระ ESP32:** ให้บอร์ดทำแค่อ่านค่าดิบจากเซนเซอร์ (0-4095) แล้วส่งขึ้นมาอย่างเดียว จะได้ทำงานเร็วและไม่กินแรมบอร์ด
+     - **ปรับสเกลง่าย:** ถ้าต้องการเปลี่ยนค่า Min/Max หรือเปลี่ยนหน่วย (เช่น % เป็น RPM) ก็ยิง API แก้ไขบนเซิร์ฟเวอร์ได้ทันที โดยไม่ต้องแก้โค้ดและไม่ต้องแฟลชบอร์ด ESP32 ใหม่
+     - **ข้อมูลตรงกัน:** เซิร์ฟเวอร์ทำหน้าที่คำนวณเป็นศูนย์กลาง ทำให้หน้าเว็บ Dashboard หรือแอปตัวอื่นที่มาต่อ ได้ค่าที่คำนวณตรงกันหมด
 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
+   - **คำตอบ:** 
+     - ในสูตรคำนวณจะมีตัวหารเป็น `(RawMax - RawMin)`:
+       - ถ้าส่งค่ามาเท่ากัน จะเกิดการหารด้วยศูนย์ ซึ่งในภาษา C# ค่า double จะกลายเป็น `Infinity` หรือ `NaN` และเมื่อเซิร์ฟเวอร์พยายามแปลงเป็น JSON ส่งกลับ จะพังด้วย `JsonException`
+       - ถ้าส่ง RawMax น้อยกว่า RawMin ตัวหารจะติดลบ ทำให้ค่าคำนวณออกมากลับทิศและค่าเพี้ยน
+     - **ผลต่อเซิร์ฟเวอร์:** ถ้าไม่ได้เขียนดักไว้ เซิร์ฟเวอร์จะคืนค่า 500 (Internal Server Error) แต่พอเราเขียนเช็คแล้วโยน `ArgumentException` ไว้ Kestrel จะส่งกลับเป็น 400 Bad Request เตือนผู้ใช้ได้ถูกต้อง และเซิร์ฟเวอร์ไม่ล่ม
 3. อธิบายสาเหตุทางเทคนิคว่าทำไมคำขอ HTTP POST ที่ไม่มี Header `Content-Type: application/json` จึงถูกปฏิเสธด้วยรหัสสถานะ `415 Unsupported Media Type`?
-
-
-
+   - **คำตอบ:** 
+     - เพราะ Header `Content-Type` เป็นตัวบอกเซิร์ฟเวอร์ว่าข้อมูลที่ส่งมาใน Body เป็นชนิดไหน
+     - ใน .NET Kestrel จะมีตัวอ่านข้อมูลที่จะทำงานก็ต่อเมื่อระบุชนิดข้อมูลตรงกัน ถ้าเป็น JSON ก็ต้องระบุ `application/json` ถึงจะยอมแปลงข้อมูลเข้า Object C#
+     - ถ้าไม่ใส่ Header นี้ เซิร์ฟเวอร์จะไม่รู้ว่าจะต้องอ่านข้อมูลแบบไหน จึงตัดการทำงานและตอบกลับ 415 เพื่อปฏิเสธข้อมูลที่ชนิดไม่ถูกต้อง
