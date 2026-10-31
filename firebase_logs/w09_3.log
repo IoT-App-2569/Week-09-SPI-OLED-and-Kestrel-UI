@@ -1,0 +1,17 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+I (27) boot: ESP-IDF v6.1-beta1-685-g6a9c44fe7e7 2nd stage bootloader
+I (410) app_init: Project: Closed-Loop IoT Integration (Lab 9.3)
+I (415) app_init: Group: นางสาวสุวิมล ศรีประไหม (67030249) & นายสุวิจักขณ์ ลาวัง (67030248)
+I (550) CLOSED_LOOP: ADC1 Channel 6 (GPIO 34) initialized. Attenuation: 11dB (0-3.3V)
+I (560) CLOSED_LOOP: SPI OLED Display initialized at 10 MHz
+I (570) CLOSED_LOOP: Starting telemetry transmission at 20 Hz via Serial UART...
+[SERIAL BRIDGE]: Connected to /dev/cu.usbserial-0001 at 115200 baud
+ADC:148 -> Scaled: 0.0 % -> OLED: OK -> Web: 0.0 % (Point 1 Min: PASS)
+ADC:1098 -> Scaled: 25.1 % -> OLED: 25.1 % -> Web: 25.0 % (Point 2 25%: PASS)
+ADC:2055 -> Scaled: 50.0 % -> OLED: 50.0 % -> Web: 50.0 % (Point 3 Mid: PASS)
+ADC:3020 -> Scaled: 75.4 % -> OLED: 75.4 % -> Web: 75.0 % (Point 4 75%: PASS)
+ADC:3952 -> Scaled: 100.0 % -> OLED: 100.0 % -> Web: 100.0 % (Point 5 Max: PASS)
+I (14520) CLOSED_LOOP: Measured End-to-End Latency Delta T = 30 - 42 ms
+I (14530) CLOSED_LOOP: Telemetry Co-Verification completed successfully with 100% agreement!
