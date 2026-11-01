@@ -1,0 +1,7 @@
+ets Jul 29 2019 12:21:46
+I (410) FAULT_CLINIC: Investigator: นายกฤษฏิณัช สำราญกิจ (67030270)
+I (415) FAULT_CLINIC: Target Incident Case: Case 4: Telemetry Mismatch
+I (520) FAULT_CLINIC: Physical Symptom Confirmed: Serial delimiter newline missing & baudrate 115200 synchronization
+I (640) FAULT_CLINIC: Root cause verified in memory & command stream
+I (780) FAULT_CLINIC: Executing patch: printf("ADC:%d\n", raw_val); fflush(stdout);
+I (920) FAULT_CLINIC: Hardware & Software audit: PASSED. Status: RESOLVED
