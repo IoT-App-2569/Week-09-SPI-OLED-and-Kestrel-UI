@@ -1,0 +1,32 @@
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5117
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /workspace/ESP32.Kestrel.Webserver
+info: ESP32.Kestrel.Webserver.Program[0]
+      Student Session Active: นายอิทธิพัทธิ์ สุทธินวล (67030360)
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://localhost:5117/api/telemetry - null null
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 200 OK - application/json; charset=utf-8 2.4512ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5117/api/potentiometer/calibrate application/json 85
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 200 OK - application/json; charset=utf-8 1.1205ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5117/api/oled/message application/json 25
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 200 OK - application/json; charset=utf-8 0.8950ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5117/api/potentiometer/calibrate application/json 85 [FAULT INJECTION: rawMax < rawMin]
+warn: ESP32.Kestrel.Webserver[0]
+      Validation Failed: RawMax (1000) must be greater than RawMin (4000)
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 400 Bad Request - application/json 0.6512ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 POST http://localhost:5117/api/oled/message null [FAULT INJECTION: Missing Content-Type]
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 415 Unsupported Media Type - null 0.3210ms
