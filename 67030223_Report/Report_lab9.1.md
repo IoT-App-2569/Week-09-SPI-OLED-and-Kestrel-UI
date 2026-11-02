@@ -1,0 +1,221 @@
+# Labsheet 9.1: 4-Wire SPI OLED SSD1306 Hardware Bringup & Initialization Sequence
+
+
+#### 1. บันทึกผลการทดลอง / โค้ดที่พัฒนา
+
+โค้ดเริ่มต้นระบบบัสฮาร์ดแวร์ SPI2, การควบคุมสัญญาณขา DC/RES, และการสั่งเปิดวงจรทวีแรงดัน (Charge Pump) เพื่อแสดงผลตัวอักษรบนจอ OLED SSD1306 ขนาด 0.96 นิ้ว ($128 \times 64$ พิกเซล) ด้วย ESP-IDF:
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+#include "esp_log.h"
+#include "font5x7.h"
+
+// การกำหนดพินเชื่อมต่อบัส SPI แบบ 4 สาย (4-Wire SPI)
+#define OLED_PIN_SCK    (GPIO_NUM_18) // D0 (SPI Clock)
+#define OLED_PIN_MOSI   (GPIO_NUM_23) // D1 (SPI Master Out Slave In)
+#define OLED_PIN_RES    (GPIO_NUM_4)  // RES (Hardware Reset)
+#define OLED_PIN_DC     (GPIO_NUM_2)  // DC (0 = Command, 1 = Data)
+#define OLED_PIN_CS     (GPIO_NUM_5)  // CS (Chip Select - Active LOW)
+
+static spi_device_handle_t s_spi_handle = NULL;
+static uint8_t s_oled_buffer[1024]; // 1KB Framebuffer (128x64 / 8)
+
+// ฟังก์ชันเริ่มต้นบัส SPI2 และตั้งค่าพิน GPIO
+esp_err_t oled_spi_init(void)
+{
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << OLED_PIN_DC) | (1ULL << OLED_PIN_RES),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+
+    spi_bus_config_t buscfg = {
+        .miso_io_num = -1,
+        .mosi_io_num = OLED_PIN_MOSI,
+        .sclk_io_num = OLED_PIN_SCK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = 1024 + 16,
+    };
+    ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO));
+
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = 10 * 1000 * 1000, // 10 MHz
+        .mode = 0,                          // SPI Mode 0 (CPOL=0, CPHA=0)
+        .spics_io_num = OLED_PIN_CS,
+        .queue_size = 7,
+    };
+    return spi_bus_add_device(SPI2_HOST, &devcfg, &s_spi_handle);
+}
+
+// ส่งคำสั่ง 1 ไบต์ (Command: ดึงขา DC = 0)
+void oled_send_cmd(uint8_t cmd)
+{
+    gpio_set_level(OLED_PIN_DC, 0);
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = 8;
+    t.tx_buffer = &cmd;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ส่งข้อมูลพิกเซล (Data: ดึงขา DC = 1)
+void oled_send_data(const uint8_t *data, size_t len)
+{
+    if (len == 0) return;
+    gpio_set_level(OLED_PIN_DC, 1);
+    spi_transaction_t t;
+    memset(&t, 0, sizeof(t));
+    t.length = len * 8;
+    t.tx_buffer = data;
+    spi_device_polling_transmit(s_spi_handle, &t);
+}
+
+// ล้างหน่วยความจำภาพในแรม
+void oled_clear(void)
+{
+    memset(s_oled_buffer, 0x00, sizeof(s_oled_buffer));
+}
+
+// วาดพิกเซล (x, y) ลงใน Framebuffer
+void oled_draw_pixel(int x, int y, bool color)
+{
+    if (x < 0 || x >= 128 || y < 0 || y >= 64) return;
+    int page = y / 8;
+    int bit = y % 8;
+    int index = (page * 128) + x;
+    if (color)
+        s_oled_buffer[index] |= (1 << bit);
+    else
+        s_oled_buffer[index] &= ~(1 << bit);
+}
+
+// วาดตัวอักษร 1 ตัวขนาด 5x7 จากบิตแมป
+void oled_draw_char(int x, int y, char c, bool color)
+{
+    if (c < 32 || c > 126) c = '?';
+    const uint8_t *bitmap = font5x7[c - 32];
+    for (int col = 0; col < 5; col++) {
+        uint8_t line = bitmap[col];
+        for (int row = 0; row < 7; row++) {
+            bool pixel = (line >> row) & 0x01;
+            oled_draw_pixel(x + col, y + row, pixel ? color : !color);
+        }
+    }
+}
+
+// วาดข้อความสตริง
+void oled_draw_string(int x, int y, const char *str, bool color)
+{
+    int cursor_x = x;
+    while (*str) {
+        oled_draw_char(cursor_x, y, *str, color);
+        cursor_x += 6; // กว้าง 5 + เว้นวรรค 1 พิกเซล
+        str++;
+    }
+}
+
+// อัปเดตข้อมูลจาก Framebuffer 1KB ลงสู่ GDDRAM ของชิป SSD1306
+void oled_flush(void)
+{
+    oled_send_cmd(0x21); // Set Column Address
+    oled_send_cmd(0x00);
+    oled_send_cmd(0x7F); // 0 ถึง 127
+    oled_send_cmd(0x22); // Set Page Address
+    oled_send_cmd(0x00);
+    oled_send_cmd(0x07); // Page 0 ถึง 7
+    oled_send_data(s_oled_buffer, sizeof(s_oled_buffer));
+}
+
+void app_main(void)
+{
+    ESP_ERROR_CHECK(oled_spi_init());
+
+    // ลำดับการรีเซ็ตฮาร์ดแวร์
+    gpio_set_level(OLED_PIN_RES, 0);
+    vTaskDelay(pdMS_TO_TICKS(15));
+    gpio_set_level(OLED_PIN_RES, 1);
+    vTaskDelay(pdMS_TO_TICKS(15));
+
+    // ชุดคำสั่งเริ่มต้นชิป SSD1306 (ชุดเริ่มต้นขั้นต้น)
+    oled_send_cmd(0xAE); // Display OFF
+    oled_send_cmd(0x8D); // Charge Pump Setting
+    oled_send_cmd(0x14); // Enable Charge Pump (ทวีแรงดัน 7.5V)
+    oled_send_cmd(0x20); // Addressing Mode
+    oled_send_cmd(0x00); // Horizontal Mode
+    oled_send_cmd(0xAF); // Display ON
+
+    // ทดสอบข้อความ Hello World และรหัสนักศึกษา
+    oled_clear();
+    oled_draw_string(30, 4, "HELLO WORLD", true);
+    oled_draw_string(24, 32, "ID: 67030211", true);
+    oled_flush();
+
+    // กิจกรรมนิติวิทยาศาสตร์ Hex Dump Page 0 (จุดเริ่มต้นตัวอักษร 'H')
+    printf("=== DUMPING FRAMEBUFFER PAGE 0 (First 16 Bytes) ===\n");
+    for (int i = 0; i < 16; i++) {
+        printf("Byte[%2d] (Col %2d): 0x%02X\n", i, i, s_oled_buffer[i]);
+    }
+}
+```
+
+#### 2. ผลลัพธ์จาก Serial Monitor / หน้าจอแสดงผล
+
+ผลลัพธ์จาก Terminal ขณะทำ Hex Dump Memory Inspection:
+```text
+=== DUMPING FRAMEBUFFER PAGE 0 (First 16 Bytes) ===
+Byte[ 0] (Col  0): 0x00
+Byte[ 1] (Col  1): 0x00
+Byte[ 2] (Col  2): 0x00
+Byte[ 3] (Col  3): 0x00
+Byte[ 4] (Col  4): 0x00
+Byte[ 5] (Col  5): 0x00
+Byte[ 6] (Col  6): 0x00
+Byte[ 7] (Col  7): 0x00
+Byte[ 8] (Col  8): 0x00
+Byte[ 9] (Col  9): 0x00
+Byte[10] (Col 10): 0x00
+Byte[11] (Col 11): 0x00
+Byte[12] (Col 12): 0x00
+Byte[13] (Col 13): 0x00
+Byte[14] (Col 14): 0x00
+Byte[15] (Col 15): 0x00
+```
+
+ตารางถอดรหัสบิตระดับนิติวิทยาศาสตร์ของตัวอักษร `'H'` (ASCII 72) จากตาราง `font5x7`:
+
+| คอลัมน์ (Column) | ค่า Hex ในตารางฟอนต์ | ค่าเลขฐานสอง (Binary Bit 7 -> 0) | รูปแบบพิกเซลที่ปรากฏ (1 = จุดสว่าง, 0 = ดำ) |
+| :---: | :---: | :---: | :---: |
+| Col 0 | `0x7F` | `01111111` | แถบแนวตั้งด้านซ้าย (7 พิกเซลสว่าง) |
+| Col 1 | `0x08` | `00001000` | ขีดแนวนอนกึ่งกลาง (บิตที่ 3 สว่าง) |
+| Col 2 | `0x08` | `00001000` | ขีดแนวนอนกึ่งกลาง (บิตที่ 3 สว่าง) |
+| Col 3 | `0x08` | `00001000` | ขีดแนวนอนกึ่งกลาง (บิตที่ 3 สว่าง) |
+| Col 4 | `0x7F` | `01111111` | แถบแนวตั้งด้านขวา (7 พิกเซลสว่าง) |
+| Col 5 | `0x00` | `00000000` | ช่องว่างเว้นวรรคระหว่างตัวอักษร (1 พิกเซลดำ) |
+
+ผลการสังเกตการณ์ทางกายภาพบนหน้าจอจริง:
+- หน้าจอ OLED ชนิด 2 สี มีแถบสีเหลือง (16 แถวบน) และแถบสีฟ้า (48 แถวล่าง)
+- ในการรันโค้ดชุดแรก ตัวอักษร `"HELLO WORLD"` และ `"ID: 67030211"` ปรากฏกลับหัว 180 องศา (Upside-down) และแถบสีเหลืองกลับไปอยู่ด้านล่างของหน้าจอ
+
+#### 3. สรุปผลและการตอบคำถามท้ายใบงาน
+
+- **สรุปผลการทดลอง:**
+สามารถเชื่อมต่อและควบคุมจอแสดงผล OLED SSD1306 ($128 \times 64$ พิกเซล) ผ่านบัสฮาร์ดแวร์ SPI แบบ 4 สาย (4-Wire SPI) ด้วยความเร็วสัญญาณนาฬิกา 10 MHz บน ESP-IDF ได้สำเร็จ โดยอาศัยสัญญาณควบคุมขา DC เพื่อสลับระหว่างคำสั่งและข้อมูลภาพ และขา RES เพื่อทำ Hardware Reset ก่อนเปิดวงจร Charge Pump ทวีแรงดัน $7.5\text{ V}$ เพื่อขับเมทริกซ์ OLED นอกจากนี้ โครงสร้างหน่วยความจำแบบ Framebuffer 1 KB ($128 \times 8\text{ Pages}$) ช่วยให้วาดจุดพิกเซลและเรนเดอร์ตัวอักษรแบบ $5 \times 7$ บิตแมปลงสู่ GDDRAM ได้อย่างแม่นยำ พร้อมทั้งวิเคราะห์สาเหตุภาพกลับหัวจากการกำหนด Segment Re-map และ COM Output Scan Direction ได้ถูกต้อง
+
+- **คำถามท้ายการทดลองเพื่อการประเมินผล (Review Questions):**
+  1. **จากการทำ Hex Dump ในกิจกรรมนิติวิทยาศาสตร์ จงอธิบายว่าทำไมตัวอักษร `'H'` จึงใช้ข้อมูลจำนวน 5 ไบต์ และแต่ละไบต์ทำหน้าที่ควบคุมพิกเซลในทิศทางใด?**
+     - **คำตอบ:** เพราะฟอนต์บิตแมปมีขนาด กว้าง 5 คอลัมน์ สูง 7 แถว (5x7 Pixels) ข้อมูล 5 ไบต์จึงใช้แทน คอลัมน์แนวตั้ง (Vertical Columns) ทั้ง 5 คอลัมน์ เรียงจากซ้ายไปขวา โดยแต่ละ 1 ไบต์ (8 บิต) จะทำหน้าที่ควบคุมพิกเซลใน แนวตั้ง (Vertical Rows 0–6) ของคอลัมน์นั้น ๆ โดยตรง (บิต 0 อยู่บนสุด ถึงบิต 6)
+
+ 2. **หากเราสลับสายไฟระหว่างขา D0 และ D1 จะเกิดผลอย่างไรกับสัญญาณ SPI และหน้าจอจะติดหรือไม่?**
+     - **คำตอบ:** คำตอบ:หน้าจอจะไม่ติด (จอมืดสนิท): เพราะขา D0 คือสัญญาณนาฬิกา (SCK/SCLK) และ D1 คือสายส่งข้อมูล (MOSI) เมื่อสลับสายกัน ชิป SSD1306 จะไม่ได้รับสัญญาณ Clock สำหรับแซมเปิลข้อมูล และไม่ได้รับข้อมูลคำสั่ง/ไบต์ที่ถูกต้อง การสื่อสารล้มเหลวโดยสิ้นเชิง จอจึงไม่สามารถรับคำสั่งเปิดระบบหรือแสดงผลใด ๆ ได้
+
+3. **เหตุใดการแก้ไขพิกัด $(x, y)$ บน `s_oled_buffer` จึงไม่ทำให้ภาพบนหน้าจอจริงเปลี่ยนทันที จนกว่าจะมีการเรียกคำสั่ง `oled_flush()`?**
+     - **คำตอบ:** เพราะ s_oled_buffer เป็นเพียง หน่วยความจำชั่วคราว (Off-screen Framebuffer) ใน RAM ของ ESP32 ไม่ใช่หน่วยความจำบนตัวจอ OLED โดยตรง ชิป SSD1306 จะเรนเดอร์พิกเซลจาก GDDRAM ภายในตัวมันเองเท่านั้น การแก้ไขในบัฟเฟอร์จึงเป็นการเปลี่ยนข้อมูลในชิป ESP32 จนกระทั่งเรียก oled_flush() เพื่อส่งข้อมูลภาพทั้งหมดผ่านบัส SPI ไปอัปเดตลง GDDRAM ของหน้าจอจริง
