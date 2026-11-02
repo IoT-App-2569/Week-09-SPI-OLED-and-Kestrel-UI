@@ -7,15 +7,8 @@
 หน้าจอแสดงผล **OLED 0.96 นิ้ว** มีพิกเซลเพียง $128 \times 64$ จุด (รวม 8,192 เม็ดพิกเซล) และแสดงผลได้เพียง 1 สี (Monochrome: สว่าง หรือ ดับ)  
 การออกแบบส่วนต่อประสานผู้ใช้ (User Interface: UI) บนอุปกรณ์ขนาดจำกัดเช่นนี้ จึงต้องอาศัยหลักการเฉพาะตัว ในการทดลองนี้เราจะแบ่งหน้าจอออกเป็นส่วนต่าง เพื่อให้ใช้งานจอภาพที่จำกัดนี้ได้ ตามไดอะแกรมต่อไปนี้
 
-```mermaid
-graph TD
-    A["Raw Framebuffer (1,024 Bytes)"] --> B["Primitive Rendering Engine<br/>(Pixel, Line, Rect, Fill)"]
-    B --> C["Font Engine<br/>(ASCII 5x7 / 8x8 Bitmap)"]
-    C --> D["Multi-Zone Compositor"]
-    D --> E["Zone 1: Status Bar (Header)"]
-    D --> F["Zone 2: Dynamic Gauge / Meter"]
-    D --> G["Zone 3: Notification Message (Footer)"]
-```
+<p align="center"><img src="Images/Fig_03-Graphics-Rendering-Engine-and-Font-Bitmaps_2026-10-27T09-38-11_academic.svg" alt="03-Graphics-Rendering-Engine-and-Font-Bitmaps" width="800" ></p>
+<p align="center">  9.3.1  ปรัชญาการออกแบบกราฟิกบนจอความละเอียดต่ำ (Low-Resolution UI Design)</p>
 
 1. **High Contrast & Visual Hierarchy:**
    - ใช้ความเปรียบต่างสูงสุด (ขาวตัดดำสนิท) เพื่อให้ผู้ใช้งานมองเห็นได้ชัดเจนในระยะ 0.5 - 1.5 เมตร

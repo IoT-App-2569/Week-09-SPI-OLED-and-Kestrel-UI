@@ -17,18 +17,8 @@
 
 ## 2. แผนผังเนื้อหาการเรียนรู้ประจำสัปดาห์ (Lesson Roadmap)
 
-```mermaid
-flowchart LR
-    A["สัปดาห์ที่ 9: SPI OLED & Kestrel UI"] --> B["1. สถาปัตยกรรมบัส SPI & คอนโทรลเลอร์ SSD1306<br/>(SPI vs I2C, 4-Wire Interface, Clock & Timing)"]
-    A --> C["2. วงจรทวีแรงดันและการปลุกหน้าจอ<br/>(Hardware Reset, Charge Pump 0x8D, Display ON)"]
-    A --> D["3. กลไกการเรนเดอร์กราฟิก & บิตแมปฟอนต์<br/>(Graphic Primitives, Font 5x7, Multi-Zone UI)"]
-    A --> E["4. สถาปัตยกรรม IoT วงปิด & การปรับเทียบ<br/>(Two-Point Calibration, Kestrel Minimal API)"]
-
-    B --> F["06-Labsheet-09-1: Deconstructed Bring-up & Hello World"]
-    E --> G["07-Labsheet-09-2: Kestrel Calibration & Display API"]
-    A --> H["08-Labsheet-09-3: Closed-Loop Integration & Co-Verification"]
-    A --> I["09-Labsheet-09-4: Troubleshooting & Fault Clinic"]
-```
+<p align="center"><img src="Images/Fig_Readme_2026-10-27T09-37-41_academic.svg" alt="Readme" ></p>
+<p align="center">  แผนผังเนื้อหาการเรียนรู้ประจำสัปดาห์ (Lesson Roadmap)</p>
 
 ---
 

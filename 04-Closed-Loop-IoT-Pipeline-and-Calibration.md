@@ -7,35 +7,8 @@
 ในระบบ IoT ระดับอุตสาหกรรม การรับข้อมูลจากเซนเซอร์ส่งไปยังเซิร์ฟเวอร์เพียงอย่างเดียว (One-Way Telemetry) ยังไม่เพียงพอ  
 ระบบที่สมบูรณ์จะต้องทำงานเป็น **Closed-Loop System** คือเมื่อเซิร์ฟเวอร์ประมวลผล ตรวจพบความผิดปกติ หรือผู้ควบคุมสั่งงานผ่านหน้าเว็บ เซิร์ฟเวอร์จะต้องสามารถ **ส่งสัญญาณหรือข้อความย้อนกลับมาสั่งการอุปกรณ์ ณ จุดติดตั้ง (Physical Edge Screen)** ได้ในทันที
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as ผู้ใช้งาน / Web Client
-    participant Kestrel as Kestrel Web Gateway (.NET 8)
-    participant ESP32 as ไมโครคอนโทรลเลอร์ ESP32
-    participant Pot as ตัวต้านทานปรับค่าได้ (Potentiometer)
-    participant OLED as หน้าจอ 0.96" SPI OLED
-
-    Note over ESP32,Pot: สตรีมข้อมูลสัญญาณแอนะล็อกอย่างต่อเนื่อง
-    Pot->>ESP32: สัญญาณแรงดัน 0 - 3.3V (ADC1 GPIO 34)
-    ESP32->>Kestrel: Raw ADC (0 - 4095) ผ่าน USB Serial / Wi-Fi
-    
-    Note over Kestrel: ประมวลผลและแปลงสเกลด้วย Calibration Model
-    Kestrel-->>User: สตรีมค่าขึ้น SVG Web Dashboard (0 - 100%)
-
-    opt ผู้ใช้งานกดปุ่ม Calibrate บนหน้าเว็บ
-        User->>Kestrel: POST /api/potentiometer/calibrate (Min, Max, Unit)
-        Kestrel->>Kestrel: อัปเดตพารามิเตอร์การปรับเทียบในหน่วยความจำ
-        Kestrel->>ESP32: ส่งคำสั่งแจ้งสถานะผ่าน Serial / HTTP
-        ESP32->>OLED: สั่งแสดงผล "CALIBRATED OK" บนโซนที่ 3 (Footer)
-    end
-
-    opt ผู้ใช้งานพิมพ์ข้อความ Broadcast บนหน้าเว็บ
-        User->>Kestrel: POST /api/oled/message {"text": "LINE-1 WARNING"}
-        Kestrel->>ESP32: ส่ง Payload ข้อความ
-        ESP32->>OLED: เรนเดอร์ข้อความเตือนบนหน้าจอ OLED ทันที!
-    end
-```
+<p align="center"><img src="Images/Fig_04-Closed-Loop-IoT-Pipeline-and-Calibration_2026-10-27T09-38-18_academic.svg" alt="04-Closed-Loop-IoT-Pipeline-and-Calibration" ></p>
+<p align="center">  9.4.1 แนวคิดสถาปัตยกรรม IoT วงปิดแบบครบวงจร (Full-Duplex Closed-Loop IoT)</p>
 
 ---
 
