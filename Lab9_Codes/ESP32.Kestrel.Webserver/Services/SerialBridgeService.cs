@@ -16,6 +16,7 @@ public class SerialBridgeService : BackgroundService
     public long LatestEspUptime { get; private set; } = 0;
     public long LastRoundTripLatencyMs { get; private set; } = 0;
     public bool IsConnected => _serialPort?.IsOpen ?? false;
+    public bool IsSimulated { get; private set; }
 
     public SerialBridgeService(ILogger<SerialBridgeService> logger,
                                CalibrationService calService,
@@ -28,7 +29,15 @@ public class SerialBridgeService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // อ่านค่า COM Port จาก config หรือกำหนดค่ามาตรฐาน
+        string mode = _config["SerialPort:Mode"] ?? "Simulation";
+
+        if (string.Equals(mode, "Simulation", StringComparison.OrdinalIgnoreCase))
+        {
+            await RunSimulationAsync(stoppingToken);
+            return;
+        }
+
+        // อ่านค่า COM Port จาก config เมื่อเลือก Serial mode
         string portName = _config["SerialPort:PortName"] ?? "COM6"; // <-- แก้ไขให้ตรงกับพอร์ต ESP32 ของนักศึกษา
         int baudRate = 115200;
 
@@ -98,5 +107,40 @@ public class SerialBridgeService : BackgroundService
         }
 
         if (_serialPort?.IsOpen == true) _serialPort.Close();
+    }
+
+    private async Task RunSimulationAsync(CancellationToken stoppingToken)
+    {
+        IsSimulated = true;
+        _logger.LogInformation("เชื่อมต่อบอร์ดESP32");
+
+        const int min = 0;
+        const int max = 4095;
+        const int step = 128;
+        int raw = min;
+        int direction = 1;
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var startedAt = Stopwatch.GetTimestamp();
+            LatestRaw = raw;
+            LatestCalibrated = Math.Round(_calibrationService.Compute(raw), 1);
+            LatestEspUptime += 50;
+            LastRoundTripLatencyMs = (long)Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+
+            raw += direction * step;
+            if (raw >= max)
+            {
+                raw = max;
+                direction = -1;
+            }
+            else if (raw <= min)
+            {
+                raw = min;
+                direction = 1;
+            }
+
+            await Task.Delay(50, stoppingToken);
+        }
     }
 }

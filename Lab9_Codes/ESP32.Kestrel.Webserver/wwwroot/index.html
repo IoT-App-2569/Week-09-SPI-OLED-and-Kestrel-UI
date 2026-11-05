@@ -92,7 +92,7 @@
 
         <div class="grid">
             <div class="stat-box">
-                <div class="stat-label">RAW ADC (ESP32)</div>
+                <div class="stat-label">RAW ADC (<span id="lbl-source">SIMULATION</span>)</div>
                 <div class="stat-val" id="lbl-raw">0</div>
             </div>
             <div class="stat-box">
@@ -128,10 +128,11 @@
                     document.getElementById('lbl-raw').innerText = data.raw;
                     document.getElementById('lbl-cal').innerText = data.calibrated;
                     document.getElementById('lbl-unit').innerText = data.unit;
+                    document.getElementById('lbl-source').innerText = data.isSimulated ? 'SIMULATION' : 'ESP32';
 
                     // ปรับความกว้างของ SVG Bar Gauge (ความกว้างหน้าต่างจริง)
                     const svgWidth = document.getElementById('svg-gauge').clientWidth - 10;
-                    const fillWidth = Math.max(0, Math.min(svgWidth, (data.calibrated / 100) * svgWidth));
+                    const fillWidth = Math.max(0, Math.min(svgWidth, (data.gaugePercent / 100) * svgWidth));
                     document.getElementById('bar-fill').setAttribute('width', fillWidth);
                     document.getElementById('bar-text').textContent = data.calibrated + ' ' + data.unit;
                 }

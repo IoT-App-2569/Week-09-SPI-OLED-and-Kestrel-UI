@@ -119,6 +119,10 @@ Week-09-SPI-OLED-and-Kestrel-UI/
 
 ---
 
+#### ผลกิจกรรม 3.0
+
+ใน repository มี firmware `Lab9_Codes/Lab9-3-ESP32-ClosedLoop` และ Kestrel `Lab9_Codes/ESP32.Kestrel.Webserver` อยู่แล้ว จึงใช้สองโปรเจกต์นี้ต่อ ไม่สร้างซ้ำ. การ build/flash firmware ต้องมี ESP-IDF v6.x; ยังไม่ได้ build หรือ flash ในงานนี้
+
 ### กิจกรรมที่ 3.1  พัฒนาเฟิร์มแวร์ ESP32 ระบบวงปิด (ESP32 Firmware Bring-up)
 
 #### ขั้นที่ 3.1.1  สร้างโปรเจกต์ ESP-IDF ใหม่
@@ -500,6 +504,10 @@ python -m esptool --chip esp32  -p COM24 -b 460800 --before default_reset --afte
 
 ---
 
+#### ผลกิจกรรม 3.1 และ Checkpoint 3.1 (ผลคาดหมายจากโค้ด)
+
+Firmware ใช้ GPIO34/ADC1 Channel 6 แบบ One-Shot 12-bit, ส่ง `ADC:<raw>,<uptime>\n` ที่ 115200 bps ทุก 50 ms และวาด OLED ผ่าน SPI2. หากไม่มี Kestrel เกิน 1500 ms คาดว่า footer แสดง `EDGE: LOCAL EDGE` และ local percent คำนวณ `(raw*100)/4095`. ไม่ได้ flash/หมุน potentiometer เพราะไม่มีบอร์ด
+
 ### กิจกรรมที่ 3.2 การขยายขีดความสามารถ Kestrel Web Server (Kestrel Serial Bridge)
 
 ในกิจกรรมนี้ นักศึกษาจะนำโปรเจกต์ `ESP32.Kestrel.Webserver` จาก Lab 9.2 มาติดตั้ง Background Worker เพื่อทำหน้าที่เป็นสะพานเชื่อมพอร์ต Serial (Two-Way Serial Bridge)
@@ -757,6 +765,10 @@ dotnet run
 
 ---
 
+#### ผลกิจกรรม 3.2 และ Checkpoint 3.2 (ผลคาดหมาย)
+
+SerialBridgeService อ่าน `ADC:...`, คำนวณ calibration แล้วตอบ `SET:<percent>:<message>\n`; เมื่อ ESP32 รับข้อมูลจะอัปเดตค่าและ heartbeat ให้แสดง CLOUD. หากไม่มีข้อมูลเกิน 1.5 s จะกลับสู่ EDGE. สำหรับงานไม่มีบอร์ดได้กำหนด Kestrel เป็น Simulation เพื่อไม่เปิด COM; ยังไม่ได้ทดสอบ Serial จริงหรือรัน Kestrel เพราะเครื่องไม่มี .NET SDK
+
 ### กิจกรรมที่ 3.3 การสร้างเว็บแดชบอร์ด Real-Time SVG Bar Gauge
 
 เพื่อทดสอบการทำงานของระบบวงปิดแบบเห็นภาพจริง ให้นักศึกษาสร้างหน้าเว็บ Web Dashboard สำหรับแสดงผลข้อมูลควบคู่ไปกับหน้าจอ OLED จริง
@@ -878,6 +890,10 @@ dotnet run
 
 ---
 
+#### ผลกิจกรรม 3.3 (วิธีตรวจหน้าเว็บ)
+
+หน้า `wwwroot/index.html` อ่าน `/api/telemetry` เพื่ออัปเดต raw, calibrated และ SVG gauge และ POST `/api/oled/message` เพื่อเปลี่ยนข้อความ. เมื่อใช้ Simulation source indicator ควรแสดง SIMULATION; ยังไม่ได้เปิดหน้าเว็บเพราะยังรัน Kestrel ไม่ได้
+
 ## 4. การตรวจวัดความหน่วงเวลาและการพิสูจน์หลักฐาน (End-to-End Latency Forensics)
 
 ### กิจกรรมที่ 4.1 การตรวจวัดความหน่วงเวลาในรอบลูปปิด (Round-Trip Latency Measurement)
@@ -907,6 +923,10 @@ Measure-Command {
 
 ---
 
+#### ผลกิจกรรม 4.1 (การตีความ latency)
+
+`Measure-Command` ที่ครอบ `curl.exe POST` วัด HTTP client-to-Kestrel response เท่านั้น ไม่ใช่ end-to-end time จน OLED วาดเสร็จ. ประมาณการส่ง telemetry 16 bytes ที่ UART 115200 bps แบบ 8-N-1 ใช้ 1.39 ms; คำตอบ 15 bytes ใช้ 1.30 ms; ส่ง framebuffer 1024 bytes ที่ SPI 10 MHz ใช้ขั้นต่ำ 0.819 ms. ดังนั้น >200 ms ควรตรวจการรอ 50 ms, timeout/reconnect, scheduling หรือ blocking ก่อน. ไม่มีค่าจับเวลาจริงเพราะไม่มีบอร์ดและไม่ได้รัน server
+
 ### กิจกรรมที่ 4.2 การบันทึกและตรวจสอบความสอดคล้องของข้อมูล (Co-Verification Matrix)
 
 ให้นักศึกษาปรับหมุน Potentiometer ไปที่ตำแหน่งมุมต่างๆ 5 ระดับ แล้วบันทึกค่าที่ปรากฏในระบบทั้ง 3 ส่วนลงในตาราง
@@ -920,6 +940,20 @@ Measure-Command {
 | หมุนขวาสุด ($180^\circ$)| | | | [ ] ตรง [ ] ไม่ตรง | |
 
 ---
+
+#### ผลกิจกรรม 4.2 (ตาราง co-verification อ้างอิง)
+
+ค่าด้านล่างคำนวณจาก default calibration raw 150–3950 → 0–100%; เป็นตัวอย่าง ไม่ใช่ผลวัดจาก potentiometer. ค่า OLED เป็น percent ที่คาดว่าจะส่งใน Cloud mode; ต้องตรวจ OLED/Zone 3 จริงภายหลัง
+
+| ตำแหน่งโดยประมาณ | Raw ADC ตัวอย่าง | Kestrel (%) | Web SVG (%) | OLED Cloud (%) คาดหมาย | Zone 3 คาดหมาย |
+|---|---:|---:|---:|---:|---|
+| ซ้ายสุด | 0 | 0.0 | 0 | 0 | CLOUD + message |
+| 45° | 1024 | 23.0 | 23.0 | 23 | CLOUD + message |
+| กลาง | 2048 | 49.9 | 49.9 | 50 | CLOUD + message |
+| 135° | 3072 | 76.9 | 76.9 | 77 | CLOUD + message |
+| ขวาสุด | 4095 | 100.0 | 100 | 100 | CLOUD + message |
+
+เมื่อ Kestrel ขาดการติดต่อเกิน 1.5 วินาที Zone 3 คาดว่าจะเปลี่ยนเป็น `EDGE: LOCAL EDGE` และใช้สเกล local. ไม่มีการติ๊กผลตรง/ไม่ตรงเพราะต้องเห็นอุปกรณ์จริง
 
 ## 5. บั๊กและข้อผิดพลาดที่พบบ่อย 
 
@@ -960,3 +994,11 @@ Measure-Command {
 2. **ความถูกต้องของการเลือกใช้งาน ADC Channel**  
    - เหตุใดการออกแบบระบบ IoT ที่รองรับการเชื่อมต่อเครือข่ายไร้สาย (Wi-Fi Stack) จึงถูกห้ามไม่ให้ใช้ขาในกลุ่ม ADC2 โดยเด็ดขาด  
    - อธิบายกลไกภายในของชิป ESP32 ที่เกี่ยวข้องกับปัญหานี้
+
+---
+
+### คำตอบคำถามท้ายการทดลอง
+
+1. **Bottleneck เมื่อ latency เกิน 200 ms:** SPI 10 MHz ส่ง 1 KB ใช้ทฤษฎีประมาณ 0.82 ms; UART 115200 bps ส่ง 16 bytes ใช้ประมาณ 1.39 ms; ADC One-Shot ใช้เวลาสั้นกว่า 200 ms มาก. จึงควรตรวจ timeout, serial read/reconnect, 50 ms polling, OS scheduling และ blocking ก่อน; แม้ UART ช้าที่สุดในแง่ throughput แต่ bandwidth ของมันไม่อธิบาย 200 ms โดยลำพัง
+2. **Hybrid Edge-Cloud Fallback:** เมื่อเครือข่าย/server หาย อุปกรณ์ยังควบคุมตามกฎ local และเข้าสู่ safe state ได้ ลดความเสี่ยงจากการค้างค่าคำสั่งหรือหยุดตอบสนอง; ต้องออกแบบ safe state ให้เหมาะกับเครื่องจักรและงานนั้น
+3. **เลือก ADC1 เมื่อใช้ Wi-Fi:** บน ESP32 รุ่นดั้งเดิม ADC2 แชร์ทรัพยากรกับ Wi-Fi และการอ่าน ADC2 อาจถูกล็อก/ล้มเหลวขณะ Wi-Fi ทำงาน; ADC1 ไม่แย่งทรัพยากรกับ Wi-Fi แบบเดียวกัน จึงเหมาะกับ sensor ที่ต้องอ่านต่อเนื่อง. โค้ดนี้ใช้ ADC1 Channel 6 บน GPIO34

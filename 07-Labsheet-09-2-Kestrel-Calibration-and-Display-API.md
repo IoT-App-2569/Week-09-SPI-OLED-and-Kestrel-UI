@@ -93,6 +93,10 @@ dotnet run
 
 
 
+#### ผลกิจกรรม 2.0
+
+โปรเจกต์ Kestrel มีอยู่แล้วใน `Lab9_Codes/ESP32.Kestrel.Webserver` จึงใช้ต่อแทนการสร้างใหม่ เป้าหมายโปรเจกต์คือ .NET 10 (`net10.0`). คำสั่งที่ใช้เมื่อมี SDK คือ `dotnet build` และ `dotnet run` ในโฟลเดอร์ดังกล่าว เครื่องนี้ไม่มี .NET SDK จึงยัง build/run และยืนยันหน้า Hello World/HTTP จริงไม่ได้
+
 ### กิจกรรมที่ 2.1: การสร้างโมเดลและบริการปรับเทียบ (Calibration Service)
 
 1. สร้างโฟลเดอร์ Services ในโปรเจกต์ ESP32.Kestrel.Webserver
@@ -157,6 +161,10 @@ public class DisplayMessageRequest
 
 
 ---
+
+#### ผลกิจกรรม 2.1
+
+`CalibrationService` เริ่มที่ raw 150–3950, scale 0–100%, clamp ค่าดิบก่อนคำนวณ linear interpolation, ปฏิเสธ `RawMax <= RawMin` ด้วย `ArgumentException` และจำกัด OLED message ไว้ 20 ตัวอักษร. `DisplayMessageRequest` รับ JSON field `message`; ข้อความว่างถูกปฏิเสธโดย route
 
 ### กิจกรรมที่ 2.2: การผูก Minimal API Routes (Program.cs)
 
@@ -225,6 +233,10 @@ app.Run();
 
 
 ---
+
+#### ผลกิจกรรม 2.2
+
+`Program.cs` ลงทะเบียน CalibrationService และ SerialBridgeService และมี GET `/api/telemetry`, POST `/api/potentiometer/calibrate`, POST `/api/oled/message`. ค่าเริ่มต้น `SerialPort:Mode=Simulation` ช่วยรันระบบโดยไม่เปิด COM: ADC ไล่ 0–4095 ทุก 50 ms และ telemetry แจ้ง `isSimulated=true`, `source="simulation"`. เมื่อมีบอร์ดจริงให้ตั้ง Mode เป็น `Serial` และ PortName ให้ตรงพอร์ต
 
 ## 4. ขั้นตอนการตรวจสอบเชิงนิติวิทยาศาสตร์ (HTTP Payload Forensics)
 
@@ -295,6 +307,10 @@ Server: Kestrel
 
 ---
 
+#### ผลกิจกรรมนิติวิทยาศาสตร์ 2.1 (ผลคาดหมาย)
+
+ใช้ URL `http://localhost:5000` หรือพอร์ตที่ Kestrel แสดง. GET telemetry คาดหมาย `200 OK` พร้อม raw/calibrated/source. POST calibration ชุด 200–3800 ไป 0–1000 RPM คาดหมาย `200 OK`, success. POST `{"message":"Hello OLED"}` คาดหมาย `200 OK`, current เป็นข้อความดังกล่าว. ยังไม่มี response ที่จับจากการรันจริงเพราะ SDK ไม่ได้ติดตั้ง; ใน Simulation ไม่มี OLED จริงรับข้อความ
+
 #### 2. ทำการ Calibrate เซนเซอร์ใหม่ (HTTP POST พร้อม JSON Body)
 จำลองการตั้งค่าช่วงแอนะล็อกดิบ 200 ถึง 3800 และสเกลเป็น 0 ถึง 1000 RPM
 
@@ -357,6 +373,10 @@ Server: Kestrel
 
 ---
 
+#### ผลคำนวณ calibration
+
+เมื่อ raw 200, 2000, 3800 กับช่วง calibration 200–3800 ไป 0–1000 RPM จะได้ 0, 500, 1000 RPM ตามลำดับ ค่านอกช่วงถูก clamp ที่ 0 หรือ 1000
+
 ### กิจกรรมนิติวิทยาศาสตร์ 2.2: Fault Injection & Vulnerability Probe (การจงใจฉีดข้อมูลวิกฤต)
 
 ในฐานะวิศวกร เราต้องทดสอบว่าระบบจะรับมือกับข้อมูลผิดพลาดได้อย่างปลอดภัยหรือไม่
@@ -379,6 +399,10 @@ Server: Kestrel
 
 ---
 
+#### ผลกิจกรรมนิติวิทยาศาสตร์ 2.2 (ผลคาดหมาย)
+
+ส่ง calibration ที่ `rawMin=4000`, `rawMax=1000` คาดหมาย `400 Bad Request` พร้อมข้อความ RawMax ต้องมากกว่า RawMin; ส่งข้อความว่างคาดหมาย `400 Bad Request` พร้อมข้อความแจ้งว่าไม่ให้ว่าง. เซิร์ฟเวอร์ควรทำงานต่อ เพราะ route จัดการ ArgumentException และ validation คืน Bad Request
+
 ## 5. คำถามท้ายการทดลองเพื่อการประเมินผล
 1. เหตุใดการคำนวณสเกลเซนเซอร์จึงควรทำที่ฝั่ง Kestrel Server แทนที่จะคำนวณบนไมโครคอนโทรลเลอร์ ESP32 ตั้งแต่แรก?
 2. จากการทำ HTTP Forensics หากไม่มีการตรวจสอบเงื่อนไข `RawMax <= RawMin` ในโค้ด จะเกิด Exception ชนิดใดขึ้นในภาษา C# และส่งผลต่อการทำงานของเซิร์ฟเวอร์อย่างไร?
@@ -386,3 +410,11 @@ Server: Kestrel
 
 
 
+
+---
+
+### คำตอบคำถามท้ายการทดลอง
+
+1. คำนวณ calibration ที่ Kestrel ช่วยเปลี่ยน Zero/Span/หน่วยได้โดยไม่ต้องแฟลช firmware ใหม่ และทำให้ไคลเอนต์หลายตัวใช้สูตรและค่าตั้งเดียวกัน; ข้อแลกเปลี่ยนคือการอัปเดต/ควบคุมต้องพึ่งเครือข่าย
+2. ในโค้ดนี้ตัวตั้งถูก cast เป็น `double` ก่อนหาร ดังนั้น `RawMax == RawMin` ให้ NaN/Infinity จาก floating-point division ไม่ใช่ `DivideByZeroException`; JSON serialization ของค่าพิเศษอาจทำให้ API ตอบ 500. กรณี `RawMax < RawMin` ทำให้ `Math.Clamp` โยน `ArgumentException`. การหาร integer โดยไม่ cast ก่อนจึงจะโยน `DivideByZeroException` เมื่อหารศูนย์
+3. Minimal API ใช้ Content-Type เพื่อเลือก input formatter ที่อ่าน body เป็น `CalibrationSettings` หรือ `DisplayMessageRequest`; หากส่ง JSON แต่ระบุ media type ที่ไม่รองรับหรือไม่ระบุ JSON formatter อาจปฏิเสธด้วย `415 Unsupported Media Type`. ใส่ `Content-Type: application/json` เพื่อบอกชนิด body ให้ชัด

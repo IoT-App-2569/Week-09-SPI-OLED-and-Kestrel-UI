@@ -20,9 +20,15 @@ app.MapGet("/api/telemetry", (CalibrationService cal, SerialBridgeService bridge
     {
         raw = bridge.LatestRaw,
         calibrated = bridge.LatestCalibrated,
+        gaugePercent = cal.Settings.ScaleMax == cal.Settings.ScaleMin
+            ? 0
+            : Math.Clamp((bridge.LatestCalibrated - cal.Settings.ScaleMin)
+                / (cal.Settings.ScaleMax - cal.Settings.ScaleMin) * 100, 0, 100),
         unit = cal.Settings.Unit,
         displayMsg = cal.CurrentOledMessage,
         isConnected = bridge.IsConnected,
+        isSimulated = bridge.IsSimulated,
+        source = bridge.IsSimulated ? "simulation" : "esp32",
         kestrelLatencyMs = bridge.LastRoundTripLatencyMs,
         timestamp = DateTime.UtcNow
     });
